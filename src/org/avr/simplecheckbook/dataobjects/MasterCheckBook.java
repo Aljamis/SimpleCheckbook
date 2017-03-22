@@ -1,0 +1,47 @@
+package org.avr.simplecheckbook.dataobjects;
+
+import java.math.BigDecimal;
+
+public class MasterCheckBook {
+	
+	private String dbName;
+	private String dbLocation;
+	private String description;
+	
+	private BigDecimal startingBalance;
+	
+	
+	
+	public MasterCheckBook() { }
+	
+	public MasterCheckBook(String dbn , String desc , String dbl) {
+		this.dbName = dbn;
+		this.dbLocation = dbl;
+		this.description = desc;
+	}
+	
+	public String getDbName() {
+		return dbName;
+	}
+	public void setDbName(String dbName) {
+		this.dbName = dbName;
+	}
+	public String getDbLocation() {
+		return dbLocation;
+	}
+	public void setDbLocation(String dbLocation) {
+		this.dbLocation = dbLocation;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public BigDecimal getStartingBalance() {
+		return startingBalance;
+	}
+	public void setStartingBalance(BigDecimal startingBalance) {
+		this.startingBalance = startingBalance;
+	}
+}
