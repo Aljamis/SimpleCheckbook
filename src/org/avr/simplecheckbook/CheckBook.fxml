@@ -22,6 +22,9 @@
             <items>
               <MenuItem mnemonicParsing="false" onAction="#handleNewCheckBook" text="New" />
               <MenuItem mnemonicParsing="false" onAction="#handleOpenExisting" text="Open Existing" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+              <MenuItem mnemonicParsing="false" onAction="#handleManageRecurring" text="Manage Recurring $$" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
               <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
             </items>
           </Menu>
@@ -109,7 +112,7 @@
 		      <Button fx:id="btnPayment" layoutX="508.0" layoutY="81.0" mnemonicParsing="false" onAction="#handlePayment" text="Payment" />
 		      <Button fx:id="btnDeposit" layoutX="432.0" layoutY="81.0" mnemonicParsing="false" onAction="#handleDeposit" text="Deposit" />
 		
-		      <Button fx:id="btnUpdate" layoutX="508.0" layoutY="81.0" mnemonicParsing="false" onAction="#handleUpdate" text="Update." visible="false" />
+		      <Button fx:id="btnUpdate" layoutX="508.0" layoutY="81.0" mnemonicParsing="false" onAction="#handleUpdate" text="Update" visible="false" />
 		      <Button fx:id="btnClear" layoutX="432.0" layoutY="81.0" mnemonicParsing="false" onAction="#handleClear" text="Clear" visible="false" />
 
          </children>

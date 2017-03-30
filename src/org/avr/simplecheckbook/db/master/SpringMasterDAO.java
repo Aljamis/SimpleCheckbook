@@ -63,6 +63,7 @@ public class SpringMasterDAO {
 		} catch (CannotGetJdbcConnectionException sqlEx) {
 			connect(";create=true");
 			createTable();
+			/* TODO  this results in an ETERNAL loop if derby.jar is not installed  */
 			return findAllCheckBooks();
 		}
 	}

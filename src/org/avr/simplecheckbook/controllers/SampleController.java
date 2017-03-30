@@ -1,12 +1,12 @@
 package org.avr.simplecheckbook.controllers;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,24 +22,22 @@ import org.avr.simplecheckbook.utils.CheckBookException;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class SampleController {
+public class SampleController extends CommonController {
 	private SpringMasterDAO masterDAO;
-	private CheckBookDAO checkBookDAO;
 	
 	@FXML private TableView<Transaction> transactionTable;
 	@FXML private DatePicker txDate;
@@ -80,12 +78,12 @@ public class SampleController {
 
 		case 1:
 			setupCheckBookDao( books.get(0) );
+			payRecurringPayments();
 			refreshTableView();
 			break;
 
 		default:
 			selectFromList( books );
-//			refreshTableView();
 			break;
 		}
 	}
@@ -110,6 +108,25 @@ public class SampleController {
 	
 	
 	
+	@FXML protected void handleManageRecurring(ActionEvent event) {
+		Parent root;
+		try {
+			FXMLLoader loader  = new FXMLLoader( getClass().getResource("/org/avr/simplecheckbook/ManageRecurring.fxml") );
+//			( (RecurringController) loader.getController()).setStage(stage);
+			root = (Parent) loader.load();
+			( (RecurringController) loader.getController()).preLaunch(checkBookDAO);
+			Stage stage = new Stage();
+			stage.setTitle("Manage Recurring");
+			stage.setScene( new Scene(root, 600, 300));
+			
+			stage.show();
+		} catch (IOException ioEx){
+			ioEx.printStackTrace();
+		}
+	}
+	
+	
+	
 	@FXML protected void handleClose() {
 		shutDown();
 		Platform.exit();
@@ -129,7 +146,11 @@ public class SampleController {
 		result.ifPresent( newCheckBook -> {
 			this.masterDAO.saveCheckbook(newCheckBook);
 			setupCheckBookDao(newCheckBook);
-			this.checkBookDAO.createTables();
+			try {
+				this.checkBookDAO.createTables();
+			} catch (CheckBookException cbEx) {
+				displayErrorDialog( cbEx.getMessage() );
+			}
 		});
 	}
 	
@@ -176,6 +197,13 @@ public class SampleController {
 	
 	
 	
+	
+	/**
+	 * Display transactions older than 180 days :
+	 *   get balance from 180 days ago
+	 *   get all transactions after that balance.
+	 *   Calculate balance after each transaction
+	 */
 	private void refreshTableView() {
 		Balance bal = checkBookDAO.getBalance(180);
 		if (bal == null) {
@@ -187,9 +215,10 @@ public class SampleController {
 		this.transactionTable.setItems( FXCollections.observableArrayList( trans ));
 		setRowHover();
 		
-		this.txAmount.setText("");
-		this.txMemo.setText("");
-		this.txPayee.setText("");
+//		this.txAmount.setText("");
+//		this.txMemo.setText("");
+//		this.txPayee.setText("");
+		clearInputFields();
 		
 		this.txDate.requestFocus();  // Assuming this method is called after every insert/update...
 	}
@@ -198,7 +227,7 @@ public class SampleController {
 	
 	
 	/**
-	 * Display the "Comment" on the tooltip whenthe mouse hovers of
+	 * Display the "Comment" on the tooltip when the mouse hovers of
 	 */
 	private void setRowHover() {
 		transactionTable.setRowFactory( tableView -> {
@@ -227,8 +256,8 @@ public class SampleController {
 			tx.setCredit( new BigDecimal(txAmount.getText() ) );
 			
 			processTransaction( tx );
+//			checkBookDAO.insertTransaction( tx );
 			
-			checkBookDAO.insertTransaction( tx );
 		} catch (CheckBookException cbEx) {
 			displayErrorDialog(cbEx.getMessage());
 		}
@@ -241,8 +270,7 @@ public class SampleController {
 			tx.setDebit( new BigDecimal(txAmount.getText() ) );
 			
 			processTransaction( tx );
-			
-			checkBookDAO.insertTransaction( tx );
+//			checkBookDAO.insertTransaction( tx );
 		} catch (CheckBookException cbEx) {
 			displayErrorDialog( cbEx.getMessage() );
 		}
@@ -284,7 +312,8 @@ public class SampleController {
 			} else {
 				newTrans.setCredit( new BigDecimal(txAmount.getText() ) );
 			}
-			checkBookDAO.updateTransaction( newTrans );
+			processTransaction(newTrans);
+//			checkBookDAO.updateTransaction( newTrans );
 			
 		} catch (CheckBookException cbEx) {
 			displayErrorDialog( cbEx.getMessage() );
@@ -318,7 +347,7 @@ public class SampleController {
 	
 	
 	/**
-	 * Toggle visbility of buttons - Ask yourself:  Should I hide Deposit and Payment?
+	 * Toggle visibility of buttons - Ask yourself:  Should I hide Deposit and Payment?
 	 * @param boo
 	 */
 	private void toggleButtons(boolean boo) {
@@ -351,6 +380,13 @@ public class SampleController {
 	
 	
 	
+	/**
+	 * Validate all REQUIRED FIELDS have been entered and their values are
+	 * within thresholds.
+	 * 
+	 * NOTE :  DatePicker fields are automatically validated to correct dates.
+	 * @throws CheckBookException
+	 */
 	private void validateInput() throws CheckBookException {
 		StringBuffer str = new StringBuffer();
 		
@@ -382,70 +418,6 @@ public class SampleController {
 	
 	
 	
-	
-	
-	/**
-	 * Display an error dialog with a message
-	 * @param message
-	 */
-	private void displayErrorDialog(String message) {
-		Alert alert = new Alert(AlertType.ERROR);
-		alert.setHeaderText("Please correct the following");
-		alert.setContentText( message );
-		alert.showAndWait();		
-	}
-	
-	
-	
-	
-	/**
-	 * Calculate the balance after each Transaction
-	 * @param bal
-	 * @param trans
-	 */
-	private void calculateTxBalance(Balance bal , List<Transaction> trans) {
-		//  Set balance for the first Tx based on Balance object
-		trans.get(0).calculateBalance( bal.getBalance() );
-		for (int i = 1; i < trans.size() ; i++) {
-			Transaction t = trans.get(i);
-			//  calculate based on previous Tx balance
-			t.calculateBalance(trans.get(i-1).getBalance());
-		}
-	}
-	
-	
-	
-	
-	/**
-	 * Handle all the balance calculating logic:
-	 * <ol>
-	 * <li>Look for prior balance</li>
-	 * <li>Collect all Tx from day of Tx</li>
-	 * <li>New Balance = Prior balance - (Transactions on that day)</li>
-	 * <li>Insert or Update new balance</li>
-	 * <li>Insert transaction</li>
-	 * </ol>
-	 * 
-	 * @param tx
-	 */
-	private void processTransaction(Transaction tx) {
-		Balance bal = previousBalance(tx);
-		Balance newBal = new Balance();
-		newBal.setDate(tx.getTxDate().toLocalDateTime().toLocalDate());
-		
-		List<Transaction> trans = checkBookDAO.getTransactionsOn( tx );
-		if ( trans.size() > 0 ) {
-			calculateTxBalance(bal, trans);
-			tx.calculateBalance( trans.get(trans.size()-1).getBalance() );
-		} else {
-			tx.calculateBalance( bal.getBalance() );
-		}
-		newBal.setBalance( tx.getBalance() );
-		checkBookDAO.saveBalance(newBal);
-	}
-	
-	
-	
 	/**
 	 * Similar to processTransaction but
 	 * <ol>
@@ -466,19 +438,6 @@ public class SampleController {
 		else 
 			b.setBalance( b.getBalance().add( tx.getDebit() ) );
 		checkBookDAO.saveBalance( b );
-	}
-	
-	
-	
-	private Balance previousBalance(Transaction tx) {
-		Balance b = checkBookDAO.getPreviousBalance( new Date( tx.getTxDate().getTime() ) );
-		if ( b == null) {
-			b = new Balance();
-			b.setBalance( new BigDecimal(0));
-			b.setDate( tx.getTxDate().toLocalDateTime().toLocalDate().plusDays(-1) );
-			checkBookDAO.saveBalance(b);
-		}
-		return b;
 	}
 	
 	
@@ -512,4 +471,6 @@ public class SampleController {
 	public void shutDown() {
 		checkBookDAO.shutDown();
 	}
+	
+	
 }

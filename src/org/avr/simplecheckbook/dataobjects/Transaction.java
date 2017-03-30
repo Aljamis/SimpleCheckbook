@@ -14,6 +14,7 @@ public class Transaction {
 	private Timestamp txDate;
 	private BigDecimal checkNumber;
 	private String payee;
+	private Integer recurId;
 	private String memo;
 	private Boolean cleared = false;
 	private BigDecimal debit;
@@ -39,10 +40,18 @@ public class Transaction {
 		this.checkNumber = checkNumber;
 	}
 	public String getPayee() {
+//		if (memo != null && memo.trim().length() > 0 )
+//			return payee +" *";  /* NOt quite ready .. recurring payments are adding this */ 
 		return payee;
 	}
 	public void setPayee(String payee) {
 		this.payee = payee;
+	}
+	public Integer getRecurId() {
+		return recurId;
+	}
+	public void setRecurId(Integer recurId) {
+		this.recurId = recurId;
 	}
 	public String getMemo() {
 		return memo;
