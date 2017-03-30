@@ -88,9 +88,10 @@
          <contextMenu>
             <ContextMenu>
               <items>
-                <MenuItem fx:id="toggleCleared" mnemonicParsing="false" onAction="#handleToggleClear" text="Toggle Cleared" />
-                  <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" onAction="#handleDeleteTransaction" text="Delete Transaction" />
+                  <MenuItem fx:id="toggleCleared" mnemonicParsing="false" onAction="#handleToggleClear" text="Toggle Cleared" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleRefresh" text="Refresh" />
+                <SeparatorMenuItem mnemonicParsing="false" />
+                   <MenuItem mnemonicParsing="false" onAction="#handleDeleteTransaction" text="Delete Transaction" />
               </items>
             </ContextMenu>
          </contextMenu>

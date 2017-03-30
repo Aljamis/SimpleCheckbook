@@ -187,11 +187,11 @@ public class SampleController {
 		this.transactionTable.setItems( FXCollections.observableArrayList( trans ));
 		setRowHover();
 		
-		this.txAmount.setText("");
-		this.txMemo.setText("");
-		this.txPayee.setText("");
+//		this.txAmount.setText("");
+//		this.txMemo.setText("");
+//		this.txPayee.setText("");
 		
-		this.txDate.requestFocus();  // Assuming this method is called after every insert/update...
+//		this.txDate.requestFocus();  // Assuming this method is called after every insert/update...
 	}
 	
 	
@@ -306,6 +306,10 @@ public class SampleController {
 		
 		refreshTableView();
 		txDate.requestFocus();	
+	}
+	@FXML protected void handleRefresh(ActionEvent event) {
+		refreshTableView();
+		clearInputFields();
 	}
 	@FXML protected void handleDeleteTransaction(ActionEvent event) {
 		Transaction trans = this.transactionTable.getSelectionModel().getSelectedItem();
@@ -489,10 +493,13 @@ public class SampleController {
 	 */
 	private void clearInputFields() {
 		txDate.setValue(null);
-		txCheckNumber.setText("");;
-		txPayee.setText("");;
-		txAmount.setText("");
-		txMemo.setText("");
+		txCheckNumber.clear();
+		txPayee.clear();;
+		txAmount.clear();
+		txMemo.clear();
+		
+		transactionTable.getSelectionModel().clearSelection();
+		toggleButtons(false);
 	}
 	
 	private void populateInputFields(Transaction trans) {
