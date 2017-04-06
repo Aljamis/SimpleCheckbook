@@ -91,7 +91,7 @@ public class CheckBookDAO {
 		createBook.append(" , cleared boolean ");
 		createBook.append(" , debit decimal(9,2) ");
 		createBook.append(" , credit decimal(9,2) ");
-		createBook.append(" , lgcl_dlt_dt timestamp )");
+		createBook.append(" , lgcl_dlt_dt timestamp ");
 		createBook.append(" )");
 
 		try {
