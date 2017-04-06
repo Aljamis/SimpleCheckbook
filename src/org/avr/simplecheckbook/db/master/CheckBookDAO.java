@@ -478,11 +478,24 @@ public class CheckBookDAO {
 	public List<RecurringPymt> getAllRecurringPymts() {
 		return getRecurringPymts("");
 	}
+	
+	/**
+	 * Find all the RECURRING_PYMT 's where termination date :
+	 * <ul>
+	 * 	<li>null</li>
+	 * 	<li>OR in the future</li>
+	 * 	<li>OR date_of_last_pymt is before term_dt</li>
+	 * </ul>
+	 *  
+	 * @return
+	 */
 	public List<RecurringPymt> getActiveRecurringPymts() {
 		StringBuffer where = new StringBuffer();
 		where.append(" where inactive_dt is null ");
 		where.append(" and eff_dt <= current_date ");
-		where.append(" and ( term_dt is null || term_dt >= current_date ) ");
+		where.append(" and ( term_dt is null ");
+		where.append("             or   ");
+		where.append("        ( term_dt >= current_date   or   date_of_last_pymt < term_dt ) )");
 		return getRecurringPymts( where.toString() );
 	}
 	private List<RecurringPymt> getRecurringPymts(String whereClause) {

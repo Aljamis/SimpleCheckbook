@@ -38,7 +38,7 @@ abstract class CommonController {
 		LocalDate today = LocalDate.now();
 		try {
 			/* Iterate through all ACTIVE recurring payments */
-			for (RecurringPymt pymt : checkBookDAO.getAllRecurringPymts()) {
+			for (RecurringPymt pymt : checkBookDAO.getActiveRecurringPymts()) {
 				
 				if (pymt.dueDate().isAfter( today )) {
 					/* TODO if within a week prompt user to enter pymt */
