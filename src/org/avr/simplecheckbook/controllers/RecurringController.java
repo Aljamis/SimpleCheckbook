@@ -135,8 +135,7 @@ public class RecurringController extends CommonController {
 		pymt.setPayTo( txPayee.getText() );
 		pymt.setAmount( new BigDecimal( txAmount.getText() ) );
 		pymt.setEffDt( effDate.getValue() );
-		if (termDate.getValue() != null ) 
-			pymt.setTermDt( termDate.getValue() );
+		pymt.setTermDt( termDate.getValue() );
 		pymt.setFrequency( cboxFrequency.getSelectionModel().getSelectedItem() );
 		return pymt;
 	}

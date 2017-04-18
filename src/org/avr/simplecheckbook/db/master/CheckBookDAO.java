@@ -482,9 +482,10 @@ public class CheckBookDAO {
 	/**
 	 * Find all the RECURRING_PYMT 's where termination date :
 	 * <ul>
-	 * 	<li>null</li>
+	 * 	<li>is null</li>
 	 * 	<li>OR in the future</li>
 	 * 	<li>OR date_of_last_pymt is before term_dt</li>
+	 * 	<li>OR term_dt is in the past and date_of_last_pymt is before term_dt </li>
 	 * </ul>
 	 *  
 	 * @return
@@ -495,7 +496,9 @@ public class CheckBookDAO {
 		where.append(" and eff_dt <= current_date ");
 		where.append(" and ( term_dt is null ");
 		where.append("             or   ");
-		where.append("        ( term_dt >= current_date   or   date_of_last_pymt < term_dt ) )");
+		where.append("        ( term_dt >= current_date   or   date_of_last_pymt < term_dt )");
+		where.append("             or   ");
+		where.append("        ( term_dt <= current_date  and   date_of_last_pymt is null ) )");
 		return getRecurringPymts( where.toString() );
 	}
 	private List<RecurringPymt> getRecurringPymts(String whereClause) {
@@ -613,6 +616,8 @@ public class CheckBookDAO {
 		ins.append("update recurring_pymt set pay_to = ? , amount=?, eff_dt=?, frequency=? ");
 		if ( pymt.getTermDt() != null )
 			ins.append(" , term_dt=? ");
+		else
+			ins.append(" , term_dt = null ");
 		ins.append(" where id = ? ");
 		
 		if ( pymt.getTermDt() != null ) {

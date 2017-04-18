@@ -173,10 +173,12 @@ public class SampleController extends CommonController {
 				existing.ifPresent( cb -> {
 					this.masterDAO.saveCheckbook(cb);
 					setupCheckBookDao(cb);
+					payRecurringPayments();
 					refreshTableView();
 				});
 			} else {
 				setupCheckBookDao( newCheckBook );
+				payRecurringPayments();
 				refreshTableView();
 			}
 		});
