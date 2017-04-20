@@ -348,6 +348,22 @@ public class SampleController extends CommonController {
 		refreshTableView();
 		txDate.requestFocus();	
 	}
+	@FXML protected void handleAbout(ActionEvent event) {
+		Parent root;
+		try {
+			FXMLLoader loader  = new FXMLLoader( getClass().getResource("/org/avr/simplecheckbook/About.fxml") );
+//			( (RecurringController) loader.getController()).setStage(stage);
+			root = (Parent) loader.load();
+			( (AboutController) loader.getController()).setVersion();
+			Stage stage = new Stage();
+			stage.setTitle("About");
+			stage.setScene( new Scene(root, 300, 400));
+			
+			stage.show();
+		} catch (IOException ioEx){
+			ioEx.printStackTrace();
+		}
+	}
 	
 	
 	
@@ -478,7 +494,11 @@ public class SampleController extends CommonController {
 	 * ONly call this when the application is shutting down.
 	 */
 	public void shutDown() {
-		checkBookDAO.shutDown();
+		/* DAO is null when user does not select a DB
+		 * and exits the application.
+		 */
+		if (checkBookDAO != null)
+			checkBookDAO.shutDown();
 	}
 	
 	
