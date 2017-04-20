@@ -357,7 +357,7 @@ public class SampleController extends CommonController {
 			( (AboutController) loader.getController()).setVersion();
 			Stage stage = new Stage();
 			stage.setTitle("About");
-			stage.setScene( new Scene(root, 300, 400));
+			stage.setScene( new Scene(root, 300, 150));
 			
 			stage.show();
 		} catch (IOException ioEx){

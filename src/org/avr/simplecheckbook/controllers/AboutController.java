@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 public class AboutController {
 	
 	@FXML private Label lblVersion;
+	@FXML private Label lblReleaseDate;
 	
 	public AboutController() { }
 	
@@ -15,6 +16,7 @@ public class AboutController {
 	public void setVersion() {
 		if (lblVersion == null) 
 			lblVersion = new Label();
-		this.lblVersion.setText( CheckBookVersion.getVersionOnly() );
+		lblVersion.setText( CheckBookVersion.getVersionOnly() );
+		lblReleaseDate.setText( CheckBookVersion.getReleaseDate() );
 	}
 }

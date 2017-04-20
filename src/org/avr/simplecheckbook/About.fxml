@@ -4,8 +4,9 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane minWidth="300.0" prefHeight="400.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.avr.simplecheckbook.controllers.AboutController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="300.0" prefHeight="150.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.avr.simplecheckbook.controllers.AboutController">
    <top>
       <ImageView fitHeight="150.0" fitWidth="297.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
          <image>
@@ -14,6 +15,11 @@
       </ImageView>
    </top>
    <bottom>
-      <Label fx:id="lblVersion" text="Version" BorderPane.alignment="CENTER" />
+      <VBox alignment="BOTTOM_CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="lblReleaseDate" text="RelDate" />
+            <Label fx:id="lblVersion" text="Version" BorderPane.alignment="CENTER" />
+         </children>
+      </VBox>
    </bottom>
 </BorderPane>
