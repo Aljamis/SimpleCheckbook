@@ -8,11 +8,10 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="300.0" prefHeight="150.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.avr.simplecheckbook.controllers.AboutController">
    <top>
-      <ImageView fitHeight="150.0" fitWidth="297.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
+      <ImageView fx:id="imgAbout" fitHeight="150.0" fitWidth="297.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
          <image>
-            <Image url="@../../../../resources/images/Checkbook.png" />
-         </image>
-      </ImageView>
+            <Image url="@../../../resources/Checkbook.png" />
+         </image></ImageView>
    </top>
    <bottom>
       <VBox alignment="BOTTOM_CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
