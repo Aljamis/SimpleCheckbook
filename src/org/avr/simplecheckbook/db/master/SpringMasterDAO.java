@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.avr.simplecheckbook.dataobjects.MasterCheckBook;
+import org.avr.simplecheckbook.utils.CheckBookVersion;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -49,13 +50,14 @@ public class SpringMasterDAO {
 	public List<MasterCheckBook> findAllCheckBooks() {
 		try {
 			List<MasterCheckBook> books = jdbcTmplt.query(
-					"select dbname , dblocation , description from checkbooks "
+					"select "+ MasterColumnNames.getAllColumnNames() +" from checkbooks "
 					, new RowMapper<MasterCheckBook>() {
 						public MasterCheckBook mapRow(ResultSet rs , int rowNum) throws SQLException {
 							MasterCheckBook cb = new MasterCheckBook();
-							cb.setDbName( rs.getString("dbname"));
-							cb.setDbLocation( rs.getString("dblocation"));
-							cb.setDescription( rs.getString("description"));
+							cb.setDbName( rs.getString( MasterColumnNames.DBNAME.toString() ));
+							cb.setDbLocation( rs.getString( MasterColumnNames.DBLOCATION.toString() ));
+							cb.setDescription( rs.getString( MasterColumnNames.DESCRIPTION.toString() ));
+							cb.setAppVersion( rs.getString( MasterColumnNames.APP_VERSION.toString() ));
 							return cb;
 						}
 					} );
@@ -76,9 +78,10 @@ public class SpringMasterDAO {
 	 */
 	private void createTable() {
 		StringBuffer str = new StringBuffer("create table checkbooks ( ");
-		str.append("  dbName      varChar(20) ");
-		str.append(", dbLocation  varChar(200) ");
-		str.append(", description varChar(100) ");
+		str.append("  ").append( MasterColumnNames.DBNAME ).append("      varChar(20) ");
+		str.append(", ").append( MasterColumnNames.DBLOCATION ).append("  varChar(200) ");
+		str.append(", ").append( MasterColumnNames.DESCRIPTION ).append(" varChar(100) ");
+		str.append(", ").append( MasterColumnNames.APP_VERSION ).append(" varChar(20) ");
 		str.append(" ) ");
 		
 		try {
@@ -94,11 +97,12 @@ public class SpringMasterDAO {
 	
 	public void saveCheckbook(MasterCheckBook cb) {
 		StringBuffer ins = new StringBuffer();
-		ins.append("insert into checkbooks ( dbname , dblocation , description ) ");
-		ins.append(" values ( ? , ? , ? ) ");
+		ins.append("insert into checkbooks ( ").append( MasterColumnNames.getAllColumnNames() );
+		ins.append(" )  values  ( ? , ? , ? , ? ) ");
 		this.jdbcTmplt.update( 
 				ins.toString()
-				, cb.getDbName() , cb.getDbLocation() , cb.getDescription()  );
+				, cb.getDbName() , cb.getDbLocation() , cb.getDescription()
+				, CheckBookVersion.getVersion() );
 	}
 
 }
