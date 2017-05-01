@@ -8,6 +8,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.avr.simplecheckbook.controllers.FrequencyController;
 import org.avr.simplecheckbook.dataobjects.Balance;
 import org.avr.simplecheckbook.dataobjects.RecurringPymt;
 import org.avr.simplecheckbook.dataobjects.RecurringTerm;
@@ -109,13 +110,13 @@ public class CheckBookDAO {
 	}
 	private void createRecurringRef() {
 		StringBuffer createBook = new StringBuffer();
-		createBook.append("CREATE TABLE TERM_R ( ");   /* convert to ENUM*/
-		createBook.append("    id integer not null generated always as identity (start with 1 , increment by 1)");
-		createBook.append("  , description varchar(50) not null");
-		createBook.append("  , on_this_date     smallint");
-		createBook.append("  , on_this_day_of_week  smallint");
-		createBook.append("  , type    varchar(8) not null");
-		createBook.append("  , alternate        smallint  default 1");
+		createBook.append("CREATE TABLE TERM_R ( ").append( TermColumnNames.ID );
+		createBook.append("     integer not null generated always as identity (start with 1 , increment by 1)");
+		createBook.append("  , ").append( TermColumnNames.DESCRIPTION ).append("   varchar(50) not null");
+		createBook.append("  , ").append( TermColumnNames.ON_THIS_DATE ).append("  smallint");
+		createBook.append("  , ").append( TermColumnNames.ON_THIS_DAY_OF_WEEK ).append("  smallint");
+		createBook.append("  , ").append( TermColumnNames.TYPE ).append("  varchar(8) not null");
+		createBook.append("  , ").append( TermColumnNames.ALTERNATE ).append("  smallint  default 1");
 		createBook.append(" )");
 
 		try {
@@ -128,15 +129,15 @@ public class CheckBookDAO {
 	}
 	private void createRecurringPymt() {
 		StringBuffer createBook = new StringBuffer();
-		createBook.append("CREATE TABLE Recurring_pymt ( ");   /* convert to enum */
-		createBook.append("    id integer not null generated always as identity (start with 1 , increment by 1)");
-		createBook.append("  , Pay_to  varchar(50) not null");
-		createBook.append("  , amount  decimal(9,2) not null");
-		createBook.append("  , Eff_Dt  date not null");
-		createBook.append("  , Term_Dt date");
-		createBook.append("  , inactive_dt   date");
-		createBook.append("  , date_of_last_pymt   date");
-		createBook.append("  , frequency    integer  not null  ) ");
+		createBook.append("CREATE TABLE Recurring_pymt ( ").append( RecurringPymtColumnNames.ID );
+		createBook.append("    integer not null generated always as identity (start with 1 , increment by 1)");
+		createBook.append("  , ").append( RecurringPymtColumnNames.PAY_TO ).append("  varchar(50) not null");
+		createBook.append("  , ").append( RecurringPymtColumnNames.AMOUNT ).append("  decimal(9,2) not null");
+		createBook.append("  , ").append( RecurringPymtColumnNames.EFF_DT ).append("  date not null");
+		createBook.append("  , ").append( RecurringPymtColumnNames.TERM_DT ).append("  date");
+		createBook.append("  , ").append( RecurringPymtColumnNames.INACTIVE_DT ).append("  date");
+		createBook.append("  , ").append( RecurringPymtColumnNames.DATE_OF_LAST_PYMT ).append("  date");
+		createBook.append("  , ").append( RecurringPymtColumnNames.FREQUENCY ).append("  integer  not null  ) ");
 
 		try {
 			jdbcTmplt.execute( createBook.toString() );
@@ -145,6 +146,7 @@ public class CheckBookDAO {
 			Platform.exit();
 		}
 	}
+	
 	
 	
 	
