@@ -187,7 +187,8 @@ public class CheckBookDAO {
 		ins.append(" values ( ? , ? , ? , ? , ? ) ");
 		this.jdbcTmplt.update( 
 				ins.toString()
-				, a.getDescription() , a.getOnThisDate() , a.getOnThisDayOfWeek() 
+				, a.getDescription() , a.getOnThisDate() 
+				, ( a.getOnThisDayOfWeek() == null ? null : a.getOnThisDayOfWeek().getValue() )   
 				, a.getType().toString() , a.getAlternate()  );
 	}
 	
