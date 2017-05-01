@@ -38,7 +38,7 @@ abstract class CommonController {
 		LocalDate today = LocalDate.now();
 		try {
 			/* Iterate through all ACTIVE recurring payments */
-			for (RecurringPymt pymt : checkBookDAO.getAllRecurringPymts()) {
+			for (RecurringPymt pymt : checkBookDAO.getActiveRecurringPymts()) {
 				
 				if (pymt.dueDate().isAfter( today )) {
 					/* TODO if within a week prompt user to enter pymt */
@@ -51,7 +51,6 @@ abstract class CommonController {
 				if (trans.size() == 0 ) {
 					/* Pay Bills */
 					while (today.isAfter( pymt.dueDate() )) {
-						System.out.println("DUE : "+ pymt.dueDate() );
 						payRecurring(pymt);
 						pymt.setDateOfLastPymt( pymt.dueDate() );
 						checkBookDAO.updateLastPayment(pymt);
@@ -140,7 +139,7 @@ abstract class CommonController {
 	 * Add a recurring payment to the transactions - Pay the recurring payment.
 	 * @param pymt
 	 */
-	protected void payRecurring(RecurringPymt pymt) throws IncalculableDueDate {
+	private void payRecurring(RecurringPymt pymt) throws IncalculableDueDate {
 		/* Create a Transaction */
 		Transaction t = new Transaction();
 		t.setTxDate( Timestamp.valueOf( LocalDateTime.now() ) );

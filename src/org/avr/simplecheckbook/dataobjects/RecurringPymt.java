@@ -34,15 +34,25 @@ public class RecurringPymt {
 	 * If a previous payment has been recorded, use that.  Otherwise calculate the
 	 * first payment.
 	 * 
+	 * If the due date occurs AFTER termination date, return Todays date +1 year.
+	 * 
 	 * @return
 	 */
 	public LocalDate dueDate() throws IncalculableDueDate {
+		LocalDate dueDate = null;
+		
 		if (dateOfLastPymt != null) {
 			switch (frequency.getType()) {
 			case MONTHLY :
-				return dateOfLastPymt.plusMonths(frequency.getAlternate());
+				dueDate = dateOfLastPymt.plusMonths(frequency.getAlternate());
+				if ( termDt != null && dueDate.isAfter( termDt ))
+					return LocalDate.now().plusYears(1);
+				return dueDate;
 			case WEEKLY :
-				return dateOfLastPymt.plusWeeks(frequency.getAlternate());
+				dueDate = dateOfLastPymt.plusWeeks(frequency.getAlternate());
+				if ( termDt != null && dueDate.isAfter( termDt ))
+					return LocalDate.now().plusYears(1);
+				return dueDate;
 			}
 		} else {
 			switch (frequency.getType()) {

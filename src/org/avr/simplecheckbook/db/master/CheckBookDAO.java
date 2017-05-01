@@ -89,21 +89,21 @@ public class CheckBookDAO {
 	private void createCheckBook() {
 		StringBuffer createBook = new StringBuffer();
 		createBook.append("CREATE TABLE checkbook ( ");
-		createBook.append(" trans_id integer not null generated always as identity (start with 1 , increment by 1) ");
-		createBook.append(" , tx_date timestamp ");
-		createBook.append(" , checkNum integer");
-		createBook.append(" , payee varchar(50) ");
-		createBook.append(" , memo varchar(70) ");
-		createBook.append(" , recur_id integer ");
-		createBook.append(" , cleared boolean ");
-		createBook.append(" , debit decimal(9,2) ");
-		createBook.append(" , credit decimal(9,2) ");
-		createBook.append(" , lgcl_dlt_dt timestamp )");
+		createBook.append(" ").append( CheckBookColumnNames.TRANS_ID ).append(" integer not null generated always as identity (start with 1 , increment by 1) ");
+		createBook.append(" , ").append( CheckBookColumnNames.TX_DATE ).append(" timestamp ");
+		createBook.append(" , ").append( CheckBookColumnNames.CHECKNUM ).append(" integer");
+		createBook.append(" , ").append( CheckBookColumnNames.PAYEE ).append(" varchar(50) ");
+		createBook.append(" , ").append( CheckBookColumnNames.MEMO ).append(" varchar(70) ");
+		createBook.append(" , ").append( CheckBookColumnNames.RECUR_ID ).append(" integer ");
+		createBook.append(" , ").append( CheckBookColumnNames.CLEARED ).append(" boolean ");
+		createBook.append(" , ").append( CheckBookColumnNames.DEBIT ).append(" decimal(9,2) ");
+		createBook.append(" , ").append( CheckBookColumnNames.CREDIT ).append(" decimal(9,2) ");
+		createBook.append(" , ").append( CheckBookColumnNames.LGCL_DLT_DT ).append(" timestamp ");
 		createBook.append(" )");
 
 		try {
 			jdbcTmplt.execute( createBook.toString() );
-			jdbcTmplt.execute("create index date_idx on checkbook (tx_date) ");
+			jdbcTmplt.execute("create index date_idx on checkbook ("+ CheckBookColumnNames.TX_DATE +") ");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			Platform.exit();
@@ -111,13 +111,13 @@ public class CheckBookDAO {
 	}
 	private void createRecurringRef() {
 		StringBuffer createBook = new StringBuffer();
-		createBook.append("CREATE TABLE TERM_R ( ");
-		createBook.append("   ").append( TermColumnNames.ID ).append(" integer not null generated always as identity (start with 1 , increment by 1)");
-		createBook.append(" , ").append( TermColumnNames.DESCRIPTION ).append(" varchar(50) not null");
-		createBook.append(" , ").append( TermColumnNames.ON_THIS_DATE ).append("     smallint");
-		createBook.append(" , ").append( TermColumnNames.ON_THIS_DAY_OF_WEEK).append("  smallint");
-		createBook.append(" , ").append( TermColumnNames.TYPE ).append("    varchar(8) not null");
-		createBook.append(" , ").append( TermColumnNames.ALTERNATE ).append("        smallint  default 1");
+		createBook.append("CREATE TABLE TERM_R ( ");   /* convert to ENUM*/
+		createBook.append("    id integer not null generated always as identity (start with 1 , increment by 1)");
+		createBook.append("  , description varchar(50) not null");
+		createBook.append("  , on_this_date     smallint");
+		createBook.append("  , on_this_day_of_week  smallint");
+		createBook.append("  , type    varchar(8) not null");
+		createBook.append("  , alternate        smallint  default 1");
 		createBook.append(" )");
 
 		try {
@@ -130,16 +130,15 @@ public class CheckBookDAO {
 	}
 	private void createRecurringPymt() {
 		StringBuffer createBook = new StringBuffer();
-		createBook.append("CREATE TABLE Recurring_pymt ( ");   
-		createBook.append("   ").append( RecurringPymtColumnNames.ID ).append(" integer not null generated always as identity (start with 1 , increment by 1)");
-		createBook.append(" , ").append( RecurringPymtColumnNames.PAY_TO ).append("  varchar(50) not null");
-		createBook.append(" , ").append( RecurringPymtColumnNames.AMOUNT ).append("  decimal(9,2) not null");
-		createBook.append(" , ").append( RecurringPymtColumnNames.EFF_DT ).append("  date not null");
-		createBook.append(" , ").append( RecurringPymtColumnNames.TERM_DT ).append(" date");
-		createBook.append(" , ").append( RecurringPymtColumnNames.INACTIVE_DT ).append("   date");
-		createBook.append(" , ").append( RecurringPymtColumnNames.DATE_OF_LAST_PYMT ).append("   date");
-		createBook.append(" , ").append( RecurringPymtColumnNames.FREQUENCY ).append("    integer  not null ");
-		createBook.append(" ) ");
+		createBook.append("CREATE TABLE Recurring_pymt ( ");   /* convert to enum */
+		createBook.append("    id integer not null generated always as identity (start with 1 , increment by 1)");
+		createBook.append("  , Pay_to  varchar(50) not null");
+		createBook.append("  , amount  decimal(9,2) not null");
+		createBook.append("  , Eff_Dt  date not null");
+		createBook.append("  , Term_Dt date");
+		createBook.append("  , inactive_dt   date");
+		createBook.append("  , date_of_last_pymt   date");
+		createBook.append("  , frequency    integer  not null  ) ");
 
 		try {
 			jdbcTmplt.execute( createBook.toString() );
@@ -214,7 +213,8 @@ public class CheckBookDAO {
 	 * @return
 	 */
 	public List<Transaction> getTransactionsAll() {
-		String qry = "select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook order by tx_date asc";
+//		String qry = "select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook order by tx_date asc";
+		String qry = "select "+ CheckBookColumnNames.getAllColumns() +" from checkbook order by tx_date asc";
 		return getTransactions(qry.toString());
 	}
 	
@@ -233,10 +233,17 @@ public class CheckBookDAO {
 	
 	public List<Transaction> getTransactionsAfter(Balance bal) {
 		StringBuffer qry = new StringBuffer();
-		qry.append("select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook ");
-		qry.append("where cast ( tx_date as date ) > '").append( bal.getDate() ).append("' ");
-		qry.append(" and  lgcl_dlt_dt is null ");
-		qry.append(" order by tx_date asc , checknum asc ");
+//		qry.append("select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook ");
+//		qry.append("where cast ( tx_date as date ) > '").append( bal.getDate() ).append("' ");
+//		qry.append(" and  lgcl_dlt_dt is null ");
+//		qry.append(" order by tx_date asc , checknum asc ");
+		
+		qry.append("select ").append( CheckBookColumnNames.getAllColumns() ).append(" from checkbook ");
+		qry.append("where cast ( ").append( CheckBookColumnNames.TX_DATE ).append(" as date ) > '").append( bal.getDate() ).append("' ");
+		qry.append(" and ").append( CheckBookColumnNames.LGCL_DLT_DT ).append(" is null ");
+		qry.append(" order by ").append( CheckBookColumnNames.TX_DATE ).append(" asc ");
+		qry.append(", ").append( CheckBookColumnNames.CHECKNUM ).append(" asc ");
+
 		
 		return getTransactions(qry.toString());
 	}
@@ -253,11 +260,18 @@ public class CheckBookDAO {
 	 */
 	public List<Transaction> getTransactionsForRecurring(LocalDate dueDate , int id) {
 		StringBuffer qry = new StringBuffer();
-		qry.append("select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook ");
-		qry.append("where cast ( tx_date as date ) > '").append( dueDate ).append("' ");
-		qry.append(" and recur_id=").append( id);
-		qry.append(" and  lgcl_dlt_dt is null ");
-		qry.append(" order by tx_date asc , checknum asc ");
+//		qry.append("select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook ");
+//		qry.append("where cast ( tx_date as date ) > '").append( dueDate ).append("' ");
+//		qry.append(" and recur_id=").append( id);
+//		qry.append(" and  lgcl_dlt_dt is null ");
+//		qry.append(" order by tx_date asc , checknum asc ");
+		
+		qry.append("select ").append( CheckBookColumnNames.getAllColumns() ).append(" from checkbook ");
+		qry.append("where cast ( ").append( CheckBookColumnNames.TX_DATE ).append(" as date ) > '").append( dueDate ).append("' ");
+		qry.append(" and ").append( CheckBookColumnNames.RECUR_ID ).append("=").append( id);
+		qry.append(" and ").append( CheckBookColumnNames.LGCL_DLT_DT ).append(" is null ");
+		qry.append(" order by ").append( CheckBookColumnNames.TX_DATE ).append(" asc ");
+		qry.append(", ").append( CheckBookColumnNames.CHECKNUM ).append(" asc ");
 		
 		return getTransactions(qry.toString());
 	}
@@ -271,10 +285,16 @@ public class CheckBookDAO {
 	 */
 	public List<Transaction> getTransactionsOn(Transaction tx) {
 		StringBuffer qry = new StringBuffer();
-		qry.append("select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook ");
-		qry.append("where cast ( tx_date as date ) = '").append( tx.getDateOnly() ).append("' ");
-		qry.append(" and  lgcl_dlt_dt is null ");
-		qry.append(" order by tx_date asc , checknum asc ");
+//		qry.append("select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook ");
+//		qry.append("where cast ( tx_date as date ) = '").append( tx.getDateOnly() ).append("' ");
+//		qry.append(" and  lgcl_dlt_dt is null ");
+//		qry.append(" order by tx_date asc , checknum asc ");
+		
+		qry.append("select ").append( CheckBookColumnNames.getAllColumns() ).append(" from checkbook ");
+		qry.append("where cast ( ").append( CheckBookColumnNames.TX_DATE ).append(" as date ) = '").append( tx.getDateOnly() ).append("' ");
+		qry.append(" and ").append( CheckBookColumnNames.LGCL_DLT_DT ).append(" is null ");
+		qry.append(" order by ").append( CheckBookColumnNames.TX_DATE ).append(" asc ");
+		qry.append(", ").append( CheckBookColumnNames.CHECKNUM ).append(" asc ");
 		
 		return getTransactions( qry.toString() );
 	}
@@ -292,14 +312,14 @@ public class CheckBookDAO {
 				, new RowMapper<Transaction>() {
 					public Transaction mapRow(ResultSet rs , int rowNum) throws SQLException {
 						Transaction t = new Transaction();
-						t.setTransID( rs.getInt("trans_id") ); 
-						t.setTxDate( rs.getTimestamp("tx_date"));
-						t.setCheckNumber( rs.getBigDecimal("checknum"));
-						t.setPayee( rs.getString("payee"));
-						t.setMemo( rs.getString("memo"));
-						t.setCleared( rs.getBoolean("cleared"));
-						t.setDebit( rs.getBigDecimal("debit"));
-						t.setCredit( rs.getBigDecimal("credit"));
+						t.setTransID( rs.getInt( CheckBookColumnNames.TRANS_ID.toString() ) ); 
+						t.setTxDate( rs.getTimestamp( CheckBookColumnNames.TX_DATE.toString() ));
+						t.setCheckNumber( rs.getBigDecimal( CheckBookColumnNames.CHECKNUM.toString() ));
+						t.setPayee( rs.getString( CheckBookColumnNames.PAYEE.toString() ));
+						t.setMemo( rs.getString( CheckBookColumnNames.MEMO.toString() ));
+						t.setCleared( rs.getBoolean( CheckBookColumnNames.CLEARED.toString() ));
+						t.setDebit( rs.getBigDecimal( CheckBookColumnNames.DEBIT.toString() ));
+						t.setCredit( rs.getBigDecimal( CheckBookColumnNames.CREDIT.toString() ));
 						return t;
 					}
 		});
@@ -316,7 +336,7 @@ public class CheckBookDAO {
 	 */
 	public Balance getBalance(int numOfDays) {
 		StringBuffer qry = new StringBuffer();
-		qry.append("select * from daily_balance where date > ");
+		qry.append("select * from daily_balance where ").append( DailyBalanceColumnNames.DATE ).append(" > ");
 		qry.append("cast (( select {fn timestampadd(SQL_TSI_DAY , -").append(numOfDays).append(" , current_timestamp ) } ");
 		qry.append("from sysibm.sysdummy1 ) as date ) order by date asc");
 		
@@ -346,8 +366,8 @@ public class CheckBookDAO {
 				, new RowMapper<Balance>() {
 					public Balance mapRow(ResultSet rs , int rowNum) throws SQLException {
 						Balance b = new Balance();
-						b.setBalance( rs.getBigDecimal("amount"));
-						b.setDate( rs.getDate("date").toLocalDate());
+						b.setBalance( rs.getBigDecimal( DailyBalanceColumnNames.AMOUNT.toString() ));
+						b.setDate( rs.getDate( DailyBalanceColumnNames.DATE.toString() ).toLocalDate());
 						return b;
 					}
 		});
@@ -373,16 +393,17 @@ public class CheckBookDAO {
 	
 	private Balance getBalance( Date txDate , String onOrbefore ) {
 		StringBuffer qry = new StringBuffer();
-		qry.append("select * from daily_balance where date ").append( onOrbefore );
+		qry.append("select ").append( DailyBalanceColumnNames.getAllColumns() );
+		qry.append(" from daily_balance where ").append( DailyBalanceColumnNames.DATE ).append( onOrbefore );
 		qry.append(" '").append( txDate );
-		qry.append("' order by date desc fetch first row only");
+		qry.append("' order by ").append( DailyBalanceColumnNames.DATE ).append(" desc fetch first row only");
 		
 		try {
 			Balance bal = jdbcTmplt.queryForObject( qry.toString() , new RowMapper<Balance>() {
 				public Balance mapRow(ResultSet rs , int rowNum) throws SQLException {
 					Balance b = new Balance();
-					b.setBalance( rs.getBigDecimal("amount"));
-					b.setDate( rs.getDate("date").toLocalDate());
+					b.setBalance( rs.getBigDecimal( DailyBalanceColumnNames.AMOUNT.toString() ));
+					b.setDate( rs.getDate( DailyBalanceColumnNames.DATE.toString() ).toLocalDate());
 					return b;
 				}
 			} );
@@ -399,7 +420,7 @@ public class CheckBookDAO {
 	 */
 	public void insertTransaction(Transaction t) {
 		StringBuffer ins = new StringBuffer();
-		ins.append("insert into checkbook ( tx_date, checknum, payee, recur_id , memo, cleared, debit , credit ) ");
+		ins.append("insert into checkbook ( ").append( CheckBookColumnNames.getInsertColumns() ).append(" ) ");
 		ins.append(" values ( ?, ? , ? , ? , ? , ? , ? , ? ) ");
 		
 		jdbcTmplt.update(
@@ -418,14 +439,14 @@ public class CheckBookDAO {
 	public void updateTransaction(Transaction t) {
 		StringBuffer upd = new StringBuffer();
 		upd.append("update checkbook set ");
-		upd.append("tx_date = ? ");
-		upd.append(", checknum = ? ");
-		upd.append(", payee = ? ");
-		upd.append(", memo = ? ");
-		upd.append(", cleared = ? ");
-		upd.append(", debit = ?  ");
-		upd.append(", credit = ?  ");
-		upd.append(" where trans_id = ? ");
+		upd.append( CheckBookColumnNames.TX_DATE).append(" = ? ");
+		upd.append(", ").append( CheckBookColumnNames.CHECKNUM ).append(" = ? ");
+		upd.append(", ").append( CheckBookColumnNames.PAYEE ).append(" = ? ");
+		upd.append(", ").append( CheckBookColumnNames.MEMO ).append(" = ? ");
+		upd.append(", ").append( CheckBookColumnNames.CLEARED ).append(" = ? ");
+		upd.append(", ").append( CheckBookColumnNames.DEBIT ).append(" = ?  ");
+		upd.append(", ").append( CheckBookColumnNames.CREDIT ).append(" = ?  ");
+		upd.append(" where ").append( CheckBookColumnNames.TRANS_ID ).append(" = ? ");
 		
 		jdbcTmplt.update( upd.toString()
 				, t.getTxDate() , t.getCheckNumber() , t.getPayee() , t.getMemo() , t.getCleared() , t.getDebit() , t.getCredit() 
@@ -441,8 +462,8 @@ public class CheckBookDAO {
 	 */
 	public void saveBalance(Balance bal) {
 		StringBuffer ins = new StringBuffer();
-		ins.append("update daily_balance set amount = ? ");
-		ins.append(" where date = ? ");
+		ins.append("update daily_balance set ").append( DailyBalanceColumnNames.AMOUNT ).append(" = ? ");
+		ins.append(" where ").append( DailyBalanceColumnNames.DATE ).append(" = ? ");
 		
 		int i = jdbcTmplt.update( 
 				ins.toString()
@@ -457,7 +478,7 @@ public class CheckBookDAO {
 	 */
 	private void insertBalance(Balance bal) {
 		StringBuffer ins = new StringBuffer();
-		ins.append("insert into daily_balance ( date, amount ) ");
+		ins.append("insert into daily_balance ( ").append( DailyBalanceColumnNames.getAllColumns() ).append(" ) ");
 		ins.append(" values ( ?, ? ) ");
 		
 		jdbcTmplt.update(
@@ -474,8 +495,8 @@ public class CheckBookDAO {
 	 */
 	public void deleteTrans(Transaction trans) {
 		StringBuffer upd = new StringBuffer();
-		upd.append("update checkbook set lgcl_dlt_dt = CURRENT_timestamp ");
-		upd.append(" where trans_id = ? ");
+		upd.append("update checkbook set ").append( CheckBookColumnNames.LGCL_DLT_DT ).append(" = CURRENT_timestamp ");
+		upd.append(" where ").append( CheckBookColumnNames.TRANS_ID ).append(" = ? ");
 		
 		jdbcTmplt.update( upd.toString() , trans.getTransID() );
 	}
@@ -486,6 +507,18 @@ public class CheckBookDAO {
 	public List<RecurringPymt> getAllRecurringPymts() {
 		return getRecurringPymts("");
 	}
+	
+	/**
+	 * Find all the RECURRING_PYMT 's where termination date :
+	 * <ul>
+	 * 	<li>is null</li>
+	 * 	<li>OR in the future</li>
+	 * 	<li>OR date_of_last_pymt is before term_dt</li>
+	 * 	<li>OR term_dt is in the past and date_of_last_pymt is before term_dt </li>
+	 * </ul>
+	 *  
+	 * @return
+	 */
 	public List<RecurringPymt> getActiveRecurringPymts() {
 		StringBuffer where = new StringBuffer();
 		where.append(" where ").append( RecurringPymtColumnNames.INACTIVE_DT ).append(" is null ");
@@ -636,5 +669,13 @@ public class CheckBookDAO {
 					, pymt.getId()
 					);
 		}
+	}
+	
+	
+	
+	
+	public void exportCheckBook() {
+		String exp = "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ( null , 'CHECKBOOK' , 'CBOOK.EXP' , null , null , null )";
+		jdbcTmplt.execute( exp );
 	}
 }
