@@ -7,6 +7,7 @@ public class MasterCheckBook {
 	private String dbName;
 	private String dbLocation;
 	private String description;
+	private String appVersion="";
 	
 	private BigDecimal startingBalance;
 	
@@ -37,6 +38,15 @@ public class MasterCheckBook {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public String getAppVersion() {
+		return appVersion;
+	}
+	public void setAppVersion(String appVersion) {
+		if (appVersion == null ) 
+			this.appVersion = "";
+		else
+			this.appVersion = appVersion;
 	}
 	public BigDecimal getStartingBalance() {
 		return startingBalance;

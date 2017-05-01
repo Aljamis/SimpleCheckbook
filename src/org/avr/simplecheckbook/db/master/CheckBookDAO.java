@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.List;
@@ -71,7 +72,13 @@ public class CheckBookDAO {
 	
 	
 	private void createDailyBalanceTable() {
-		String createBalance = "CREATE TABLE daily_balance ( date date , amount decimal(9,2) ) ";
+//		String createBalance = "CREATE TABLE daily_balance ( date date , amount decimal(9,2) ) ";
+		StringBuffer createBalance = new StringBuffer();
+		createBalance.append("CREATE TABLE daily_balance ( ");
+		createBalance.append("   ").append( DailyBalanceColumnNames.DATE ).append("   date ");
+		createBalance.append(" , ").append( DailyBalanceColumnNames.AMOUNT ).append(" decimal(9,2) ");
+		createBalance.append(" ) ");
+		
 		try {
 			jdbcTmplt.execute( createBalance.toString() );		
 		} catch (Exception ex) {
@@ -105,12 +112,12 @@ public class CheckBookDAO {
 	private void createRecurringRef() {
 		StringBuffer createBook = new StringBuffer();
 		createBook.append("CREATE TABLE TERM_R ( ");
-		createBook.append("    id integer not null generated always as identity (start with 1 , increment by 1)");
-		createBook.append("  , description varchar(50) not null");
-		createBook.append("  , on_this_date     smallint");
-		createBook.append("  , on_this_day_of_week  smallint");
-		createBook.append("  , type    varchar(8) not null");
-		createBook.append("  , alternate        smallint  default 1");
+		createBook.append("   ").append( TermColumnNames.ID ).append(" integer not null generated always as identity (start with 1 , increment by 1)");
+		createBook.append(" , ").append( TermColumnNames.DESCRIPTION ).append(" varchar(50) not null");
+		createBook.append(" , ").append( TermColumnNames.ON_THIS_DATE ).append("     smallint");
+		createBook.append(" , ").append( TermColumnNames.ON_THIS_DAY_OF_WEEK).append("  smallint");
+		createBook.append(" , ").append( TermColumnNames.TYPE ).append("    varchar(8) not null");
+		createBook.append(" , ").append( TermColumnNames.ALTERNATE ).append("        smallint  default 1");
 		createBook.append(" )");
 
 		try {
@@ -123,15 +130,16 @@ public class CheckBookDAO {
 	}
 	private void createRecurringPymt() {
 		StringBuffer createBook = new StringBuffer();
-		createBook.append("CREATE TABLE Recurring_pymt ( ");
-		createBook.append("    id integer not null generated always as identity (start with 1 , increment by 1)");
-		createBook.append("  , Pay_to  varchar(50) not null");
-		createBook.append("  , amount  decimal(9,2) not null");
-		createBook.append("  , Eff_Dt  date not null");
-		createBook.append("  , Term_Dt date");
-		createBook.append("  , inactive_dt   date");
-		createBook.append("  , date_of_last_pymt   date");
-		createBook.append("  , frequency    integer  not null  ) ");
+		createBook.append("CREATE TABLE Recurring_pymt ( ");   
+		createBook.append("   ").append( RecurringPymtColumnNames.ID ).append(" integer not null generated always as identity (start with 1 , increment by 1)");
+		createBook.append(" , ").append( RecurringPymtColumnNames.PAY_TO ).append("  varchar(50) not null");
+		createBook.append(" , ").append( RecurringPymtColumnNames.AMOUNT ).append("  decimal(9,2) not null");
+		createBook.append(" , ").append( RecurringPymtColumnNames.EFF_DT ).append("  date not null");
+		createBook.append(" , ").append( RecurringPymtColumnNames.TERM_DT ).append(" date");
+		createBook.append(" , ").append( RecurringPymtColumnNames.INACTIVE_DT ).append("   date");
+		createBook.append(" , ").append( RecurringPymtColumnNames.DATE_OF_LAST_PYMT ).append("   date");
+		createBook.append(" , ").append( RecurringPymtColumnNames.FREQUENCY ).append("    integer  not null ");
+		createBook.append(" ) ");
 
 		try {
 			jdbcTmplt.execute( createBook.toString() );
@@ -170,7 +178,8 @@ public class CheckBookDAO {
 		
 		RecurringTerm w = new RecurringTerm();
 		w.setDescription("Weekly-M");
-		w.setOnThisDayOfWeek( (short)Calendar.MONDAY );
+//		w.setOnThisDayOfWeek( (short)Calendar.MONDAY );
+		w.setOnThisDayOfWeek( DayOfWeek.MONDAY );
 		w.setType(TermType.WEEKLY);
 		w.setAlternate((short)1);
 		insertTermRef(w);
@@ -178,7 +187,7 @@ public class CheckBookDAO {
 	
 	private void insertTermRef(RecurringTerm a) {
 		StringBuffer ins = new StringBuffer();
-		ins.append("insert into term_r ( description , on_this_date , on_this_day_of_week , type , alternate ) ");
+		ins.append("insert into term_r ( ").append( TermColumnNames.getInsertColumns() ).append(" ) ");
 		ins.append(" values ( ? , ? , ? , ? , ? ) ");
 		this.jdbcTmplt.update( 
 				ins.toString()
@@ -191,8 +200,7 @@ public class CheckBookDAO {
 	public void updateLastPayment(RecurringPymt pymt) {
 		StringBuffer ins = new StringBuffer();
 		ins.append("update Recurring_pymt ");
-//		ins.append(" set date_of_last_pymt ='").append( pymt.getDateOfLastPymt() ).append("' ");
-		ins.append(" set date_of_last_pymt = ? where id = ?");
+		ins.append(" set ").append( RecurringPymtColumnNames.DATE_OF_LAST_PYMT ).append(" = ? where id = ?");
 		this.jdbcTmplt.update( 
 				ins.toString()
 				, Date.valueOf( pymt.getDateOfLastPymt() ), pymt.getId()  );
@@ -480,15 +488,18 @@ public class CheckBookDAO {
 	}
 	public List<RecurringPymt> getActiveRecurringPymts() {
 		StringBuffer where = new StringBuffer();
-		where.append(" where inactive_dt is null ");
-		where.append(" and eff_dt <= current_date ");
-		where.append(" and ( term_dt is null || term_dt >= current_date ) ");
+		where.append(" where ").append( RecurringPymtColumnNames.INACTIVE_DT ).append(" is null ");
+		where.append(" and ").append( RecurringPymtColumnNames.EFF_DT ).append(" <= current_date ");
+		where.append(" and ( ").append( RecurringPymtColumnNames.TERM_DT ).append(" is null ");
+		where.append("             or   ");
+		where.append("        ( ").append( RecurringPymtColumnNames.TERM_DT ).append(" >= current_date   or   ").append( RecurringPymtColumnNames.DATE_OF_LAST_PYMT ).append(" < ").append( RecurringPymtColumnNames.TERM_DT ).append(" )");
+		where.append("             or   ");
+		where.append("        ( ").append( RecurringPymtColumnNames.TERM_DT ).append(" <= current_date  and   ").append( RecurringPymtColumnNames.DATE_OF_LAST_PYMT ).append(" is null ) )");
 		return getRecurringPymts( where.toString() );
 	}
 	private List<RecurringPymt> getRecurringPymts(String whereClause) {
 		StringBuffer qry = new StringBuffer();
-		qry.append("select id , pay_to, amount, eff_dt, term_dt, inactive_dt");
-		qry.append(", date_of_last_pymt , frequency ");
+		qry.append("select ").append( RecurringPymtColumnNames.getAllColumnNames() ).append(" ");
 		qry.append(" from recurring_pymt ");
 		qry.append( whereClause );
 		
@@ -496,22 +507,21 @@ public class CheckBookDAO {
 				, new RowMapper<RecurringPymt>() {
 					public RecurringPymt mapRow(ResultSet rs , int rowNum) throws SQLException {
 						RecurringPymt t = new RecurringPymt();
-						t.setId( rs.getInt("id") ); 
-						t.setPayTo( rs.getString("pay_to"));
-						t.setAmount( rs.getBigDecimal("amount"));
-						if (  rs.getDate("date_of_last_pymt") != null )
-							t.setDateOfLastPymt( rs.getDate("date_of_last_pymt").toLocalDate() );
-						t.setFrequency( getTermR( rs.getInt("frequency")) );
-						t.setEffDt( rs.getDate("eff_dt").toLocalDate() );
-						if ( rs.getDate("term_dt") != null )
-							t.setTermDt( rs.getDate("term_dt").toLocalDate() );
-						if ( rs.getDate("inactive_dt") != null )
-							t.setInactiveDt( rs.getDate("inactive_dt").toLocalDate() );
+						t.setId( rs.getInt( RecurringPymtColumnNames.ID.toString() ) ); 
+						t.setPayTo( rs.getString( RecurringPymtColumnNames.PAY_TO.toString() ));
+						t.setAmount( rs.getBigDecimal( RecurringPymtColumnNames.AMOUNT.toString() ));
+						if (  rs.getDate( RecurringPymtColumnNames.DATE_OF_LAST_PYMT.toString() ) != null )
+							t.setDateOfLastPymt( rs.getDate( RecurringPymtColumnNames.DATE_OF_LAST_PYMT.toString() ).toLocalDate() );
+						t.setFrequency( getTermR( rs.getInt( RecurringPymtColumnNames.FREQUENCY.toString() )) );
+						t.setEffDt( rs.getDate( RecurringPymtColumnNames.EFF_DT.toString() ).toLocalDate() );
+						if ( rs.getDate( RecurringPymtColumnNames.TERM_DT.toString() ) != null )
+							t.setTermDt( rs.getDate( RecurringPymtColumnNames.TERM_DT.toString() ).toLocalDate() );
+						if ( rs.getDate( RecurringPymtColumnNames.INACTIVE_DT.toString() ) != null )
+							t.setInactiveDt( rs.getDate( RecurringPymtColumnNames.INACTIVE_DT.toString() ).toLocalDate() );
 						return t;
 					}
 		});
 		return trans;
-	
 	}
 	
 	
@@ -522,19 +532,21 @@ public class CheckBookDAO {
 	 */
 	private RecurringTerm getTermR(int id) {
 		StringBuffer qry = new StringBuffer();
-		qry.append("select id , description , on_this_date, on_this_day_of_week, type, alternate");
-		qry.append(" from term_r where id =").append( id );
+		qry.append("select ").append( TermColumnNames.getAllColumns() ).append(" ");
+		qry.append(" from term_r where ").append( TermColumnNames.ID ).append(" =").append( id );
 		
 		RecurringTerm trans = jdbcTmplt.queryForObject( qry.toString()
 				, new RowMapper<RecurringTerm>() {
 					public RecurringTerm mapRow(ResultSet rs , int rowNum) throws SQLException {
 						RecurringTerm t = new RecurringTerm();
-						t.setId( rs.getInt("id") ); 
-						t.setDescription( rs.getString("description") );
-						t.setOnThisDate( rs.getShort("on_this_date") );
-						t.setOnThisDayOfWeek( rs.getShort("on_this_day_Of_week") );
-						t.setAlternate( rs.getShort("alternate") );
-						t.setType( TermType.valueOf( rs.getString("type") ) );
+						t.setId( rs.getInt( TermColumnNames.ID.toString() ) ); 
+						t.setDescription( rs.getString( TermColumnNames.DESCRIPTION.toString() ) );
+						t.setOnThisDate( rs.getShort( TermColumnNames.ON_THIS_DATE.toString() ) );
+//						t.setOnThisDayOfWeek( rs.getShort( TermColumnNames.ON_THIS_DAY_OF_WEEK.toString() ) );
+						if ( rs.getShort( TermColumnNames.ON_THIS_DAY_OF_WEEK.toString() ) > 0 )
+							t.setOnThisDayOfWeek( DayOfWeek.of( rs.getShort( TermColumnNames.ON_THIS_DAY_OF_WEEK.toString() ) ) );
+						t.setAlternate( rs.getShort( TermColumnNames.ALTERNATE.toString()) );
+						t.setType( TermType.valueOf( rs.getString( TermColumnNames.TYPE.toString()) ) );
 						return t;
 					}
 		});
@@ -547,19 +559,21 @@ public class CheckBookDAO {
 	
 	public List<RecurringTerm> getAllTermR() {
 		StringBuffer qry = new StringBuffer();
-		qry.append("select id , description , on_this_date, on_this_day_of_week, type, alternate");
+		qry.append("select ").append( TermColumnNames.getAllColumns() ).append(" ");
 		qry.append(" from term_r ");
 		
 		List<RecurringTerm> trans = jdbcTmplt.query( qry.toString()
 				, new RowMapper<RecurringTerm>() {
 					public RecurringTerm mapRow(ResultSet rs , int rowNum) throws SQLException {
 						RecurringTerm t = new RecurringTerm();
-						t.setId( rs.getInt("id") ); 
-						t.setDescription( rs.getString("description") );
-						t.setOnThisDate( rs.getShort("on_this_date") );
-						t.setOnThisDayOfWeek( rs.getShort("on_this_day_Of_week") );
-						t.setAlternate( rs.getShort("alternate") );
-						t.setType( TermType.valueOf( rs.getString("type") ) );
+						t.setId( rs.getInt( TermColumnNames.ID.toString() ) ); 
+						t.setDescription( rs.getString( TermColumnNames.DESCRIPTION.toString() ) );
+						t.setOnThisDate( rs.getShort( TermColumnNames.ON_THIS_DATE.toString() ) );
+//						t.setOnThisDayOfWeek( rs.getShort( TermColumnNames.ON_THIS_DAY_OF_WEEK.toString() ) );
+						if ( rs.getShort( TermColumnNames.ON_THIS_DAY_OF_WEEK.toString() ) > 0 )
+							t.setOnThisDayOfWeek( DayOfWeek.of( rs.getShort( TermColumnNames.ON_THIS_DAY_OF_WEEK.toString() ) ) );
+						t.setAlternate( rs.getShort( TermColumnNames.ALTERNATE.toString() ) );
+						t.setType( TermType.valueOf( rs.getString( TermColumnNames.TYPE.toString() ) ) );
 						return t;
 					}
 		});
@@ -573,9 +587,9 @@ public class CheckBookDAO {
 	
 	public void insertRecurringPayment(RecurringPymt pymt) {
 		StringBuffer ins = new StringBuffer();
-		ins.append("insert into recurring_pymt ( pay_to, amount, eff_dt, frequency ");
+		ins.append("insert into recurring_pymt ( ").append( RecurringPymtColumnNames.getInsertColumns() ).append(" ");
 		if ( pymt.getTermDt() != null )
-			ins.append(" , term_dt ");
+			ins.append(" , ").append( RecurringPymtColumnNames.TERM_DT ).append(" ");
 		ins.append(" )  values  ( ?, ?, ?, ? ");
 		if ( pymt.getTermDt() != null )
 			ins.append(" , ? ");
@@ -597,10 +611,15 @@ public class CheckBookDAO {
 	}
 	public void updateRecurringPayment(RecurringPymt pymt) {
 		StringBuffer ins = new StringBuffer();
-		ins.append("update recurring_pymt set pay_to = ? , amount=?, eff_dt=?, frequency=? ");
+		ins.append("update recurring_pymt set ").append( RecurringPymtColumnNames.PAY_TO ).append(" = ? ");
+		ins.append(" , ").append( RecurringPymtColumnNames.AMOUNT ).append("=? ");
+		ins.append(" , ").append( RecurringPymtColumnNames.EFF_DT ).append("=? ");
+		ins.append(" , ").append( RecurringPymtColumnNames.FREQUENCY ).append("=? ");
 		if ( pymt.getTermDt() != null )
-			ins.append(" , term_dt=? ");
-		ins.append(" where id = ? ");
+			ins.append(" , ").append( RecurringPymtColumnNames.TERM_DT ).append("=? ");
+		else
+			ins.append(" , ").append( RecurringPymtColumnNames.TERM_DT ).append(" = null ");
+		ins.append(" where ").append( RecurringPymtColumnNames.ID ).append(" = ? ");
 		
 		if ( pymt.getTermDt() != null ) {
 			jdbcTmplt.update(

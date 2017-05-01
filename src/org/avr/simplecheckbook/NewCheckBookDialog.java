@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Optional;
 
 import org.avr.simplecheckbook.dataobjects.MasterCheckBook;
+import org.avr.simplecheckbook.utils.CheckBookVersion;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -89,6 +90,7 @@ public class NewCheckBookDialog extends Dialog<MasterCheckBook> {
 					mcb.setDbName( txtDbName.getText() );
 					mcb.setDescription( txtDesc.getText() );
 //					mcb.setStartingBalance( new BigDecimal(txtBeginingBalance.getText()) );
+					mcb.setAppVersion( CheckBookVersion.getVersion() );
 					return mcb;
 				}
 				return null;

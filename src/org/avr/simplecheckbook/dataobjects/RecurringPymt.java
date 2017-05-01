@@ -50,7 +50,8 @@ public class RecurringPymt {
 				return  LocalDate.of(effDt.getYear(), effDt.getMonth(), frequency.getOnThisDate() );
 			case WEEKLY :
 				LocalDate today = LocalDate.now();
-				int x = frequency.getOnThisDayOfWeek() - today.getDayOfWeek().getValue();
+//				int x = frequency.getOnThisDayOfWeek() - today.getDayOfWeek().getValue();
+				int x = frequency.getOnThisDayOfWeek().getValue() - today.getDayOfWeek().getValue();
 				return today.plusDays( x );
 			}
 		}

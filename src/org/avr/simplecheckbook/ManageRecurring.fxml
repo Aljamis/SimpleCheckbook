@@ -65,10 +65,10 @@
    <bottom>
       <Pane maxHeight="121.0" maxWidth="600.0" prefHeight="120.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
-		      <DatePicker fx:id="effDate" layoutX="455.0" layoutY="14.0" prefHeight="25.0" prefWidth="121.0" promptText="Effective Date" />
-              <DatePicker fx:id="termDate" layoutX="455.0" layoutY="48.0" prefHeight="25.0" prefWidth="121.0" promptText="Termination Date" />
-		      <TextField fx:id="txPayee" layoutX="4.0" layoutY="14.0" prefHeight="25.0" prefWidth="382.0" promptText="Pay To" />
-		      <TextField fx:id="txAmount" layoutX="46.0" layoutY="48.0" promptText="Amount" />
+            <TextField fx:id="txPayee" layoutX="4.0" layoutY="14.0" prefHeight="25.0" prefWidth="382.0" promptText="Pay To" />
+		    <TextField fx:id="txAmount" layoutX="46.0" layoutY="48.0" promptText="Amount" />
+		    <DatePicker fx:id="effDate" layoutX="455.0" layoutY="14.0" prefHeight="25.0" prefWidth="121.0" promptText="Effective Date" />
+            <DatePicker fx:id="termDate" layoutX="455.0" layoutY="48.0" prefHeight="25.0" prefWidth="121.0" promptText="Termination Date" />
 
 		
             <ComboBox fx:id="cboxFrequency" layoutX="236.0" layoutY="48.0" prefWidth="150.0" promptText="Frequency" />

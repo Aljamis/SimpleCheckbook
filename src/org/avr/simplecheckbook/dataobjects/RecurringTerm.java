@@ -1,6 +1,7 @@
 package org.avr.simplecheckbook.dataobjects;
 
-
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 
 /**
  * Object representation of TERM_R table
@@ -12,7 +13,8 @@ public class RecurringTerm {
 	private Integer id;
 	private String description;
 	private short onThisDate;
-	private short onThisDayOfWeek;
+//	private short onThisDayOfWeek;
+	private DayOfWeek onThisDayOfWeek;
 	private TermType type;
 	private short alternate;
 	
@@ -37,10 +39,16 @@ public class RecurringTerm {
 	public void setOnThisDate(short onThisDate) {
 		this.onThisDate = onThisDate;
 	}
-	public short getOnThisDayOfWeek() {
+//	public short getOnThisDayOfWeek() {
+//		return onThisDayOfWeek;
+//	}
+//	public void setOnThisDayOfWeek(short onThisDayOfWeek) {
+//		this.onThisDayOfWeek = onThisDayOfWeek;
+//	}
+	public DayOfWeek getOnThisDayOfWeek() {
 		return onThisDayOfWeek;
 	}
-	public void setOnThisDayOfWeek(short onThisDayOfWeek) {
+	public void setOnThisDayOfWeek(DayOfWeek onThisDayOfWeek) {
 		this.onThisDayOfWeek = onThisDayOfWeek;
 	}
 	public TermType getType() {
@@ -55,4 +63,27 @@ public class RecurringTerm {
 	public void setAlternate(short alternate) {
 		this.alternate = alternate;
 	}
+	
+	/**
+	 * Return text value of Day of week.
+	 * @return
+	 */
+	public String getDayOfWeekText() {
+//		if (onThisDayOfWeek == 0 ) return "";
+//		return DayOfWeek.of( onThisDayOfWeek).toString();
+		if ( onThisDayOfWeek == null)
+			return "";
+		return onThisDayOfWeek.toString();
+	}
+	
+	public String getDayOfMonth() {
+		if (onThisDate == 0) return "";
+		return ""+ onThisDate;
+	}
+	
+	public LocalDate getDayOfMonthAsDate() {
+		return LocalDate.now().withDayOfMonth( onThisDate );
+	}
 }
+
+

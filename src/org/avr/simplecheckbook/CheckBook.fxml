@@ -24,6 +24,7 @@
               <MenuItem mnemonicParsing="false" onAction="#handleOpenExisting" text="Open Existing" />
                   <SeparatorMenuItem mnemonicParsing="false" />
               <MenuItem mnemonicParsing="false" onAction="#handleManageRecurring" text="Manage Recurring $$" />
+              <MenuItem mnemonicParsing="false" onAction="#handleManageFrequency" text="Manage Recurring Frequency" />
                   <SeparatorMenuItem mnemonicParsing="false" />
               <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
             </items>

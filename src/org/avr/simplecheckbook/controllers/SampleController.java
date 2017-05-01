@@ -19,18 +19,22 @@ import org.avr.simplecheckbook.dataobjects.Transaction;
 import org.avr.simplecheckbook.db.master.CheckBookDAO;
 import org.avr.simplecheckbook.db.master.SpringMasterDAO;
 import org.avr.simplecheckbook.utils.CheckBookException;
+import org.avr.simplecheckbook.utils.CheckBookVersion;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -116,6 +120,30 @@ public class SampleController extends CommonController {
 			root = (Parent) loader.load();
 			( (RecurringController) loader.getController()).preLaunch(checkBookDAO);
 			Stage stage = new Stage();
+			stage.setTitle("Manage Frequencies");
+			stage.setScene( new Scene(root, 600, 300));
+			
+			stage.show();
+		} catch (IOException ioEx){
+			ioEx.printStackTrace();
+		}
+	}
+	
+	
+	
+	
+	
+	/**
+	 * Create/Edit Frequency terms.  Values stored in TERM_R.
+	 * @param event
+	 */
+	@FXML protected void handleManageFrequency(ActionEvent event) {
+		Parent root;
+		try {
+			FXMLLoader loader  = new FXMLLoader( getClass().getResource("/org/avr/simplecheckbook/ManageFrequency.fxml") );
+			root = (Parent) loader.load();
+			( (FrequencyController) loader.getController()).preLaunch(checkBookDAO);
+			Stage stage = new Stage();
 			stage.setTitle("Manage Recurring");
 			stage.setScene( new Scene(root, 600, 300));
 			
@@ -157,6 +185,31 @@ public class SampleController extends CommonController {
 	
 	
 	
+	/**
+	 * Prompt user to update the database :
+	 * - export existing data
+	 * - create an entirely new checkbook in the same location
+	 * - load new checkbook
+	 * - tell user to delete old one using windows
+	 */
+	private void promptForDBupdate() {
+		System.out.println("Update the checkbook DB");
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Confirm");
+		alert.setHeaderText("Rebuild checkbook?");
+		alert.setContentText("The version of the application is inconsistent with the checkbook.");
+		
+		Optional<ButtonType> result = alert.showAndWait();
+		if ( result.get() == ButtonType.OK ) {
+			upgradeCheckBook();
+		} else {
+			System.out.println("Might have some inconsistent issues");
+		}
+	}
+	
+	
+	
+	
 	
 	/**
 	 * Present user with a list of possible checkbooks
@@ -193,6 +246,9 @@ public class SampleController extends CommonController {
 		primaryStage.setTitle(cb.getDbName() +" - "+ cb.getDescription() );
 		
 		this.checkBookDAO = new CheckBookDAO( cb.getDbLocation() + File.separatorChar + cb.getDbName());
+		
+		if (!cb.getAppVersion().equals( CheckBookVersion.getVersion() ))
+			promptForDBupdate();
 	}
 	
 	
@@ -215,12 +271,7 @@ public class SampleController extends CommonController {
 		this.transactionTable.setItems( FXCollections.observableArrayList( trans ));
 		setRowHover();
 		
-//		this.txAmount.setText("");
-//		this.txMemo.setText("");
-//		this.txPayee.setText("");
 		clearInputFields();
-		
-//		this.txDate.requestFocus();  // Assuming this method is called after every insert/update...
 	}
 	
 	
@@ -480,4 +531,12 @@ public class SampleController extends CommonController {
 	}
 	
 	
+	
+	
+	/**
+	 * Export data from checkbook
+	 */
+	private void upgradeCheckBook() {
+		checkBookDAO.exportCheckBook();
+	}
 }
