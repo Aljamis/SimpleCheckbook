@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.Calendar;
 import java.util.List;
 
 import org.avr.simplecheckbook.dataobjects.Balance;
@@ -72,7 +71,6 @@ public class CheckBookDAO {
 	
 	
 	private void createDailyBalanceTable() {
-//		String createBalance = "CREATE TABLE daily_balance ( date date , amount decimal(9,2) ) ";
 		StringBuffer createBalance = new StringBuffer();
 		createBalance.append("CREATE TABLE daily_balance ( ");
 		createBalance.append("   ").append( DailyBalanceColumnNames.DATE ).append("   date ");
@@ -177,7 +175,6 @@ public class CheckBookDAO {
 		
 		RecurringTerm w = new RecurringTerm();
 		w.setDescription("Weekly-M");
-//		w.setOnThisDayOfWeek( (short)Calendar.MONDAY );
 		w.setOnThisDayOfWeek( DayOfWeek.MONDAY );
 		w.setType(TermType.WEEKLY);
 		w.setAlternate((short)1);
@@ -213,7 +210,6 @@ public class CheckBookDAO {
 	 * @return
 	 */
 	public List<Transaction> getTransactionsAll() {
-//		String qry = "select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook order by tx_date asc";
 		String qry = "select "+ CheckBookColumnNames.getAllColumns() +" from checkbook order by tx_date asc";
 		return getTransactions(qry.toString());
 	}
@@ -233,11 +229,6 @@ public class CheckBookDAO {
 	
 	public List<Transaction> getTransactionsAfter(Balance bal) {
 		StringBuffer qry = new StringBuffer();
-//		qry.append("select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook ");
-//		qry.append("where cast ( tx_date as date ) > '").append( bal.getDate() ).append("' ");
-//		qry.append(" and  lgcl_dlt_dt is null ");
-//		qry.append(" order by tx_date asc , checknum asc ");
-		
 		qry.append("select ").append( CheckBookColumnNames.getAllColumns() ).append(" from checkbook ");
 		qry.append("where cast ( ").append( CheckBookColumnNames.TX_DATE ).append(" as date ) > '").append( bal.getDate() ).append("' ");
 		qry.append(" and ").append( CheckBookColumnNames.LGCL_DLT_DT ).append(" is null ");
@@ -258,14 +249,8 @@ public class CheckBookDAO {
 	 * @param id
 	 * @return
 	 */
-	public List<Transaction> getTransactionsForRecurring(LocalDate dueDate , int id) {
+	public List<Transaction> getRecurringTxAfter(LocalDate dueDate , int id) {
 		StringBuffer qry = new StringBuffer();
-//		qry.append("select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook ");
-//		qry.append("where cast ( tx_date as date ) > '").append( dueDate ).append("' ");
-//		qry.append(" and recur_id=").append( id);
-//		qry.append(" and  lgcl_dlt_dt is null ");
-//		qry.append(" order by tx_date asc , checknum asc ");
-		
 		qry.append("select ").append( CheckBookColumnNames.getAllColumns() ).append(" from checkbook ");
 		qry.append("where cast ( ").append( CheckBookColumnNames.TX_DATE ).append(" as date ) > '").append( dueDate ).append("' ");
 		qry.append(" and ").append( CheckBookColumnNames.RECUR_ID ).append("=").append( id);
@@ -285,11 +270,6 @@ public class CheckBookDAO {
 	 */
 	public List<Transaction> getTransactionsOn(Transaction tx) {
 		StringBuffer qry = new StringBuffer();
-//		qry.append("select trans_id , tx_date, checknum, payee, memo, cleared, debit , credit from checkbook ");
-//		qry.append("where cast ( tx_date as date ) = '").append( tx.getDateOnly() ).append("' ");
-//		qry.append(" and  lgcl_dlt_dt is null ");
-//		qry.append(" order by tx_date asc , checknum asc ");
-		
 		qry.append("select ").append( CheckBookColumnNames.getAllColumns() ).append(" from checkbook ");
 		qry.append("where cast ( ").append( CheckBookColumnNames.TX_DATE ).append(" as date ) = '").append( tx.getDateOnly() ).append("' ");
 		qry.append(" and ").append( CheckBookColumnNames.LGCL_DLT_DT ).append(" is null ");
@@ -525,7 +505,7 @@ public class CheckBookDAO {
 		where.append(" and ").append( RecurringPymtColumnNames.EFF_DT ).append(" <= current_date ");
 		where.append(" and ( ").append( RecurringPymtColumnNames.TERM_DT ).append(" is null ");
 		where.append("             or   ");
-		where.append("        ( ").append( RecurringPymtColumnNames.TERM_DT ).append(" >= current_date   or   ").append( RecurringPymtColumnNames.DATE_OF_LAST_PYMT ).append(" < ").append( RecurringPymtColumnNames.TERM_DT ).append(" )");
+		where.append("        ( ").append( RecurringPymtColumnNames.TERM_DT ).append(" >= current_date  and   ").append( RecurringPymtColumnNames.DATE_OF_LAST_PYMT ).append(" < ").append( RecurringPymtColumnNames.TERM_DT ).append(" )");
 		where.append("             or   ");
 		where.append("        ( ").append( RecurringPymtColumnNames.TERM_DT ).append(" <= current_date  and   ").append( RecurringPymtColumnNames.DATE_OF_LAST_PYMT ).append(" is null ) )");
 		return getRecurringPymts( where.toString() );
@@ -669,6 +649,49 @@ public class CheckBookDAO {
 					, pymt.getId()
 					);
 		}
+	}
+	
+	
+	
+	
+	/**
+	 * Insert new TERM_R
+	 * @param term
+	 */
+	public void insertRecurringTerm(RecurringTerm term) {
+		StringBuffer ins = new StringBuffer();
+		ins.append("insert into term_r ( ").append( TermColumnNames.getInsertColumns() ).append(") ");
+		ins.append(" values ( ? , ? , ? , ? , ? ) ");
+		
+		jdbcTmplt.update( ins.toString()
+				, term.getDescription()
+				, (term.getType()  ==  TermType.MONTHLY ? term.getOnThisDate() : null )
+				, (term.getType()  ==  TermType.WEEKLY ? term.getOnThisDayOfWeek().getValue() : null )
+				, term.getType().toString() , term.getAlternate()
+				);
+	}
+	
+	
+	
+	
+	
+	public void updateRecurringTerm(RecurringTerm term) {
+		StringBuffer ins = new StringBuffer();
+		ins.append("update term_r ");
+		ins.append("set ").append( TermColumnNames.DESCRIPTION ).append(" = ?");
+		ins.append(" , ").append( TermColumnNames.TYPE ).append(" = ?");
+		ins.append(" , ").append( TermColumnNames.ALTERNATE ).append(" = ?");
+		ins.append(" , ").append( TermColumnNames.ON_THIS_DATE ).append(" = ?");
+		ins.append(" , ").append( TermColumnNames.ON_THIS_DAY_OF_WEEK ).append(" = ?");
+		ins.append(" where  ").append( TermColumnNames.ID ).append(" = ?");
+		
+		jdbcTmplt.update( ins.toString()
+				, term.getDescription()
+				, term.getType().toString() , term.getAlternate()
+				, (term.getType()  ==  TermType.MONTHLY ? term.getOnThisDate() : null )
+				, (term.getType()  ==  TermType.WEEKLY ? term.getOnThisDayOfWeek().getValue() : null )
+				, term.getId()
+				);
 	}
 	
 	

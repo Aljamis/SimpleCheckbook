@@ -75,7 +75,7 @@ public class RecurringController extends CommonController {
 		if (validInput()) {
 			checkBookDAO.insertRecurringPayment( prepPymt() );
 			if ( prepPymt().getEffDt().isBefore( LocalDate.now() ))
-				payRecurringPayments();
+				findRecurringPayments();
 			refresh();
 		}
 	}
@@ -84,7 +84,7 @@ public class RecurringController extends CommonController {
 		if (validInput()) {
 			checkBookDAO.updateRecurringPayment( prepPymt() );
 			if ( prepPymt().getEffDt().isBefore( LocalDate.now() ))
-				payRecurringPayments();
+				findRecurringPayments();
 			refresh();
 		}
 	}

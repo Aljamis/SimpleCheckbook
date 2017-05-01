@@ -13,7 +13,6 @@ public class RecurringTerm {
 	private Integer id;
 	private String description;
 	private short onThisDate;
-//	private short onThisDayOfWeek;
 	private DayOfWeek onThisDayOfWeek;
 	private TermType type;
 	private short alternate;
@@ -39,12 +38,6 @@ public class RecurringTerm {
 	public void setOnThisDate(short onThisDate) {
 		this.onThisDate = onThisDate;
 	}
-//	public short getOnThisDayOfWeek() {
-//		return onThisDayOfWeek;
-//	}
-//	public void setOnThisDayOfWeek(short onThisDayOfWeek) {
-//		this.onThisDayOfWeek = onThisDayOfWeek;
-//	}
 	public DayOfWeek getOnThisDayOfWeek() {
 		return onThisDayOfWeek;
 	}
@@ -69,8 +62,6 @@ public class RecurringTerm {
 	 * @return
 	 */
 	public String getDayOfWeekText() {
-//		if (onThisDayOfWeek == 0 ) return "";
-//		return DayOfWeek.of( onThisDayOfWeek).toString();
 		if ( onThisDayOfWeek == null)
 			return "";
 		return onThisDayOfWeek.toString();
@@ -85,5 +76,3 @@ public class RecurringTerm {
 		return LocalDate.now().withDayOfMonth( onThisDate );
 	}
 }
-
-

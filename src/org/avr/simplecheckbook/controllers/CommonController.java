@@ -5,7 +5,9 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 import org.avr.simplecheckbook.dataobjects.Balance;
 import org.avr.simplecheckbook.dataobjects.RecurringPymt;
@@ -14,6 +16,7 @@ import org.avr.simplecheckbook.db.master.CheckBookDAO;
 import org.avr.simplecheckbook.utils.IncalculableDueDate;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert.AlertType;
 
 /**
@@ -33,35 +36,95 @@ abstract class CommonController {
 	
 	/**
 	 * Performed only once, when starting, and insert recurring payments that are now DUE.
+	 * 
+	 * Query for all Active recurring payments.  If the due-date has passed or it is 
+	 * within 7 days of the due-date (and the user AGREES to make the early payment)
+	 * send this RecurringPymt to get paid.
 	 */
-	protected void payRecurringPayments() {
+	protected void findRecurringPayments() {
 		LocalDate today = LocalDate.now();
 		try {
 			/* Iterate through all ACTIVE recurring payments */
 			for (RecurringPymt pymt : checkBookDAO.getActiveRecurringPymts()) {
 				
-				if (pymt.dueDate().isAfter( today )) {
-					/* TODO if within a week prompt user to enter pymt */
-					continue;		/* if DueDate > Today  -- SKIP */
+				if ( today.isBefore( pymt.dueDate() ) ) {
+					/* payment is not DUE yet */
+					if ( ChronoUnit.DAYS.between( today , pymt.dueDate() ) <= 7 ) {
+						/* But it is due in the next 7 days */
+						if ( promptToPayRecurringPaymentEarly( pymt ) ){
+							/* User has selected to record this payment early */
+							makeThisPayment( pymt );
+						}
+						continue;
+					} else 
+						continue;		/* if DueDate > Today  -- SKIP */
 				}
 				
-				/* select all transactions where transDate > DueDate */
-				List<Transaction> trans = checkBookDAO.getTransactionsForRecurring( pymt.dueDate(),  pymt.getId() );
-				/* if RS is empty */
-				if (trans.size() == 0 ) {
-					/* Pay Bills */
-					while (today.isAfter( pymt.dueDate() )) {
-						payRecurring(pymt);
-						pymt.setDateOfLastPymt( pymt.dueDate() );
-						checkBookDAO.updateLastPayment(pymt);
-					}
-				}
+				payRecurringPayment(pymt);
+				
 			}
 			
 			
 		} catch (IncalculableDueDate ddEx) {
 			displayErrorDialog("Could not process recurring payments b/c Due Date could not be calculated");
 		}
+	}
+	
+	
+	
+	
+	
+	/**
+	 * Has this payment already been made?  If not, make the payments until it 
+	 * is caught up. 
+	 * @param pymt
+	 */
+	private void payRecurringPayment( RecurringPymt pymt) {
+		try {
+			if ( !recurringTxAlreadyPaid( pymt ) ) {
+				while ( LocalDate.now().isAfter( pymt.dueDate() ) 
+						|| LocalDate.now().isEqual( pymt.dueDate() ) ) {
+					makeThisPayment( pymt );
+				}
+			}
+		} catch (IncalculableDueDate ddEx) {
+			displayErrorDialog("Could not process recurring payments b/c Due Date could not be calculated");
+		}
+	}
+	
+	
+	
+	
+	/**
+	 * Has this payment already been made?  Is there a row in the checkbook for this 
+	 * Recurring Payment occurring after the due-date?
+	 * 
+	 * @param pymt
+	 * @return
+	 * @throws IncalculableDueDate
+	 */
+	private boolean recurringTxAlreadyPaid( RecurringPymt pymt ) throws IncalculableDueDate {
+		/* select all transactions where transDate > DueDate */
+		List<Transaction> trans = checkBookDAO.getRecurringTxAfter( pymt.dueDate(),  pymt.getId() );
+		if (trans.size() == 0 ) {
+			return false;			//  Has not yet been paid
+		}
+		return true;				//  Has been paid
+		
+	}
+	
+	
+	
+	
+	/**
+	 * Record the transaction, update LastPayment column
+	 * @param pymt
+	 * @throws IncalculableDueDate
+	 */
+	private void makeThisPayment( RecurringPymt pymt ) throws IncalculableDueDate {
+		payRecurring(pymt);
+		pymt.setDateOfLastPymt( pymt.dueDate() );
+		checkBookDAO.updateLastPayment(pymt);
 	}
 	
 	
@@ -164,5 +227,30 @@ abstract class CommonController {
 		alert.setHeaderText("Please correct the following");
 		alert.setContentText( message );
 		alert.showAndWait();		
+	}
+	
+	
+	
+	
+	/**
+	 * If this payment has not been recorded yet, prompt the user to pay it
+	 * 
+	 * @param pymt
+	 * @return
+	 */
+	private boolean promptToPayRecurringPaymentEarly( RecurringPymt pymt ) throws IncalculableDueDate {
+		if ( recurringTxAlreadyPaid( pymt ) )
+			return false;
+		
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Pay "+ pymt.getPayTo() +" Early?");
+		alert.setHeaderText(pymt.getPayTo() +" is due "+ pymt.dueDate().toString() );
+		alert.setContentText("Do you want to record $"+ pymt.getAmount() +" today?");
+		
+		Optional<ButtonType> result = alert.showAndWait();
+		if ( result.get() == ButtonType.OK )
+			return true;
+		else 
+			return false;
 	}
 }

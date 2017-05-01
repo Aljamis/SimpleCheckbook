@@ -82,7 +82,7 @@ public class SampleController extends CommonController {
 
 		case 1:
 			setupCheckBookDao( books.get(0) );
-			payRecurringPayments();
+			findRecurringPayments();
 			refreshTableView();
 			break;
 
@@ -226,12 +226,12 @@ public class SampleController extends CommonController {
 				existing.ifPresent( cb -> {
 					this.masterDAO.saveCheckbook(cb);
 					setupCheckBookDao(cb);
-					payRecurringPayments();
+					findRecurringPayments();
 					refreshTableView();
 				});
 			} else {
 				setupCheckBookDao( newCheckBook );
-				payRecurringPayments();
+				findRecurringPayments();
 				refreshTableView();
 			}
 		});
