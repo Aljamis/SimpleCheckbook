@@ -8,7 +8,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.avr.simplecheckbook.controllers.FrequencyController;
 import org.avr.simplecheckbook.dataobjects.Balance;
 import org.avr.simplecheckbook.dataobjects.RecurringPymt;
 import org.avr.simplecheckbook.dataobjects.RecurringTerm;

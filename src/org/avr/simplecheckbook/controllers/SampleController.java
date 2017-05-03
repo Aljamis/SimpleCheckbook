@@ -105,8 +105,6 @@ public class SampleController extends CommonController {
 	@FXML protected void handleOpenExisting(ActionEvent event) {
 		List<MasterCheckBook> books = masterDAO.findAllCheckBooks();
 		selectFromList( books ) ;
-		
-		refreshTableView();
 	}
 	
 	
@@ -249,8 +247,9 @@ public class SampleController extends CommonController {
 		
 		this.checkBookDAO = new CheckBookDAO( cb.getDbLocation() + File.separatorChar + cb.getDbName());
 		
-		if (!cb.getAppVersion().equals( CheckBookVersion.getVersion() ))
-			promptForDBupdate();
+		/* TODO see if the versions are compatible */
+//		if (!cb.getAppVersion().equals( CheckBookVersion.getVersion() ))
+//			promptForDBupdate();
 	}
 	
 	

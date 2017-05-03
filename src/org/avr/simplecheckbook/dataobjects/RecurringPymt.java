@@ -59,10 +59,10 @@ public class RecurringPymt {
 			case MONTHLY :
 				return  LocalDate.of(effDt.getYear(), effDt.getMonth(), frequency.getOnThisDate() );
 			case WEEKLY :
-				LocalDate today = LocalDate.now();
-//				int x = frequency.getOnThisDayOfWeek() - today.getDayOfWeek().getValue();
+//				LocalDate today = LocalDate.now();
+				LocalDate today = getEffDt();  // Use EFFECTIVE DATE
 				int x = frequency.getOnThisDayOfWeek().getValue() - today.getDayOfWeek().getValue();
-				return today.plusDays( x );
+				return today.plusDays( (x) );
 			}
 		}
 		
