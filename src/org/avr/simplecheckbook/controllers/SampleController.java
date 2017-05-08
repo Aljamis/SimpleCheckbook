@@ -20,6 +20,7 @@ import org.avr.simplecheckbook.db.master.CheckBookDAO;
 import org.avr.simplecheckbook.db.master.SpringMasterDAO;
 import org.avr.simplecheckbook.utils.CheckBookException;
 import org.avr.simplecheckbook.utils.CheckBookVersion;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -81,9 +82,13 @@ public class SampleController extends CommonController {
 			break;
 
 		case 1:
-			setupCheckBookDao( books.get(0) );
-			findRecurringPayments();
-			refreshTableView();
+			try{
+				setupCheckBookDao( books.get(0) );
+				findRecurringPayments();
+				refreshTableView();
+			} catch (CannotGetJdbcConnectionException noDBex) {
+				displayErrorDialog("Could not connect to "+ books.get(0).getDbLocation() );
+			}
 			break;
 
 		default:
