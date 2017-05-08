@@ -100,7 +100,7 @@ public class SampleController extends CommonController {
 	 */
 	@FXML protected void handleNewCheckBook(ActionEvent event) {
 		promptForNewCheckBook();
-		refreshTableView();
+//		refreshTableView();			// NO!! This is a new check book. There wont be anything to refresh!!
 	}
 	@FXML protected void handleOpenExisting(ActionEvent event) {
 		List<MasterCheckBook> books = masterDAO.findAllCheckBooks();
