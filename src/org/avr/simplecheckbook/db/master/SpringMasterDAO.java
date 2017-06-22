@@ -23,10 +23,12 @@ import javafx.application.Platform;
 public class SpringMasterDAO {
 	
 	private JdbcTemplate jdbcTmplt;
+	static final String SCHEMA = CheckBookVersion.getVersion();
 	
 	
 	public SpringMasterDAO() {
 		this.connect("");
+		doesDBexist();
 	}
 	
 	
@@ -42,32 +44,38 @@ public class SpringMasterDAO {
 	
 	
 	
-	
 	/**
-	 * Query MASTER db for all the checkbooks.  If the DB does not exist, create it.
-	 * @return
+	 * Does this DB exist yet? Or should I create it?
 	 */
-	public List<MasterCheckBook> findAllCheckBooks() {
+	private void doesDBexist() {
 		try {
-			List<MasterCheckBook> books = jdbcTmplt.query(
-					"select "+ MasterColumnNames.getAllColumnNames() +" from checkbooks "
-					, new RowMapper<MasterCheckBook>() {
-						public MasterCheckBook mapRow(ResultSet rs , int rowNum) throws SQLException {
-							MasterCheckBook cb = new MasterCheckBook();
-							cb.setDbName( rs.getString( MasterColumnNames.DBNAME.toString() ));
-							cb.setDbLocation( rs.getString( MasterColumnNames.DBLOCATION.toString() ));
-							cb.setDescription( rs.getString( MasterColumnNames.DESCRIPTION.toString() ));
-							cb.setAppVersion( rs.getString( MasterColumnNames.APP_VERSION.toString() ));
-							return cb;
-						}
-					} );
-			return books;
+			findAllCheckBooks();
 		} catch (CannotGetJdbcConnectionException sqlEx) {
 			connect(";create=true");
 			createTable();
-			/* TODO  this results in an ETERNAL loop if derby.jar is not installed  */
-			return findAllCheckBooks();
 		}
+	}
+	
+	
+	
+	
+	/**
+	 * Query MASTER db for all the checkbooks.
+	 * @return
+	 */
+	public List<MasterCheckBook> findAllCheckBooks() {
+		List<MasterCheckBook> books = jdbcTmplt.query(
+				"select "+ MasterColumnNames.getAllColumnNames() +" from checkbooks "
+				, new RowMapper<MasterCheckBook>() {
+					public MasterCheckBook mapRow(ResultSet rs , int rowNum) throws SQLException {
+						MasterCheckBook cb = new MasterCheckBook();
+						cb.setDbName( rs.getString( MasterColumnNames.DBNAME.toString() ));
+						cb.setDbLocation( rs.getString( MasterColumnNames.DBLOCATION.toString() ));
+						cb.setDescription( rs.getString( MasterColumnNames.DESCRIPTION.toString() ));
+						return cb;
+					}
+				} );
+		return books;
 	}
 	
 	
@@ -81,7 +89,6 @@ public class SpringMasterDAO {
 		str.append("  ").append( MasterColumnNames.DBNAME ).append("      varChar(20) ");
 		str.append(", ").append( MasterColumnNames.DBLOCATION ).append("  varChar(200) ");
 		str.append(", ").append( MasterColumnNames.DESCRIPTION ).append(" varChar(100) ");
-		str.append(", ").append( MasterColumnNames.APP_VERSION ).append(" varChar(20) ");
 		str.append(" ) ");
 		
 		try {
@@ -98,11 +105,10 @@ public class SpringMasterDAO {
 	public void saveCheckbook(MasterCheckBook cb) {
 		StringBuffer ins = new StringBuffer();
 		ins.append("insert into checkbooks ( ").append( MasterColumnNames.getAllColumnNames() );
-		ins.append(" )  values  ( ? , ? , ? , ? ) ");
+		ins.append(" )  values  ( ? , ? , ? ) ");
 		this.jdbcTmplt.update( 
 				ins.toString()
 				, cb.getDbName() , cb.getDbLocation() , cb.getDescription()
-				, CheckBookVersion.getVersion() );
+		);
 	}
-
 }

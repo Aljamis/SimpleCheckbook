@@ -1,10 +1,10 @@
 package org.avr.simplecheckbook.db.master;
 
 public enum MasterColumnNames {
-	DBNAME , DBLOCATION , DESCRIPTION , APP_VERSION ;
+	DBNAME , DBLOCATION , DESCRIPTION ;
 	
 	
 	public static String getAllColumnNames() {
-		return DBNAME +" , "+ DBLOCATION +" , "+ DESCRIPTION +" , "+ APP_VERSION;
+		return DBNAME +" , "+ DBLOCATION +" , "+ DESCRIPTION ;
 	}
 }

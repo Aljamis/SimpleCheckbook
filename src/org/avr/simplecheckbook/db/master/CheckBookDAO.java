@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.avr.simplecheckbook.dataobjects.Balance;
@@ -14,7 +15,6 @@ import org.avr.simplecheckbook.dataobjects.RecurringTerm;
 import org.avr.simplecheckbook.dataobjects.TermType;
 import org.avr.simplecheckbook.dataobjects.Transaction;
 import org.avr.simplecheckbook.utils.CheckBookException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -339,7 +339,7 @@ public class CheckBookDAO {
 	
 	
 	/**
-	 * Perform the SQL
+	 * Return a collection of Balance's based on the SQL
 	 * @param qry
 	 * @return
 	 */
@@ -380,19 +380,23 @@ public class CheckBookDAO {
 		qry.append(" '").append( txDate );
 		qry.append("' order by ").append( DailyBalanceColumnNames.DATE ).append(" desc fetch first row only");
 		
-		try {
-			Balance bal = jdbcTmplt.queryForObject( qry.toString() , new RowMapper<Balance>() {
-				public Balance mapRow(ResultSet rs , int rowNum) throws SQLException {
-					Balance b = new Balance();
-					b.setBalance( rs.getBigDecimal( DailyBalanceColumnNames.AMOUNT.toString() ));
-					b.setDate( rs.getDate( DailyBalanceColumnNames.DATE.toString() ).toLocalDate());
-					return b;
-				}
-			} );
-			return bal;
-		} catch (EmptyResultDataAccessException emptyEx) {
-			return null;
-		}
+		List<Balance> balances = getBalance( qry.toString() );
+		if (balances.size() > 0)
+			return balances.get(0);
+		return null;
+	}
+	
+	
+	
+	
+	public List<Balance> getBalancesAfter(Date txDate ) {
+		StringBuffer qry = new StringBuffer();
+		qry.append("select ").append( DailyBalanceColumnNames.getAllColumns() );
+		qry.append(" from daily_balance where ").append( DailyBalanceColumnNames.DATE );
+		qry.append(" > '").append( new Date( txDate.getTime() ) );
+		qry.append("' order by ").append( DailyBalanceColumnNames.DATE ).append(" asc ");
+		
+		return getBalance( qry.toString() );
 	}
 	
 	

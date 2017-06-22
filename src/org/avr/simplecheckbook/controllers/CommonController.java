@@ -161,6 +161,26 @@ abstract class CommonController {
 			checkBookDAO.insertTransaction(tx);
 		else
 			checkBookDAO.updateTransaction(tx);
+		
+		updateFutureBalances(tx);
+	}
+	
+	
+	
+	
+	/**
+	 * 
+	 * @param tx
+	 */
+	private void updateFutureBalances(Transaction tx) {
+		List<Balance> balances = checkBookDAO.getBalancesAfter( new Date(tx.getTxDate().getTime() ) );
+		for (Balance balance : balances) {
+			if (tx.getCredit() == null )
+				balance.subrtractPayment( tx.getDebit() );
+			else 
+				balance.addDeposit( tx.getCredit() );
+			checkBookDAO.saveBalance(balance);
+		}
 	}
 	
 	
@@ -193,7 +213,6 @@ abstract class CommonController {
 		}
 		return b;
 	}
-
 	
 	
 	

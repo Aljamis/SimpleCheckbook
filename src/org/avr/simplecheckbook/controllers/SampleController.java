@@ -105,7 +105,7 @@ public class SampleController extends CommonController {
 	 */
 	@FXML protected void handleNewCheckBook(ActionEvent event) {
 		promptForNewCheckBook();
-//		refreshTableView();			// NO!! This is a new check book. There wont be anything to refresh!!
+		refreshTableView();
 	}
 	@FXML protected void handleOpenExisting(ActionEvent event) {
 		List<MasterCheckBook> books = masterDAO.findAllCheckBooks();
@@ -307,27 +307,31 @@ public class SampleController extends CommonController {
 	
 	
 	@FXML protected void handleDeposit(ActionEvent event) {
-		try {
-			validateInput();
-			Transaction tx = createTransactionFromUI();
-			tx.setCredit( new BigDecimal(txAmount.getText() ) );
-			
-			processTransaction( tx );
-//			checkBookDAO.insertTransaction( tx );
-			
-		} catch (CheckBookException cbEx) {
-			displayErrorDialog(cbEx.getMessage());
-		}
-		refreshTableView();
+		handleTransaction( txAmount.getText() , null );
 	}
 	@FXML protected void handlePayment(ActionEvent event) {
+		handleTransaction( null, txAmount.getText() );
+	}
+	
+	
+	
+	/**
+	 * Validate all input, create a Transaction and populate with either
+	 * a deposit or payment.
+	 * @param deposit
+	 * @param payment
+	 */
+	private void handleTransaction( String deposit , String payment ) {
 		try {
 			validateInput();
 			Transaction tx = createTransactionFromUI();
-			tx.setDebit( new BigDecimal(txAmount.getText() ) );
+			if ( deposit == null ) {
+				tx.setDebit( new BigDecimal( payment ) );
+			} else {
+				tx.setCredit( new BigDecimal( deposit ) );
+			}
 			
 			processTransaction( tx );
-//			checkBookDAO.insertTransaction( tx );
 		} catch (CheckBookException cbEx) {
 			displayErrorDialog( cbEx.getMessage() );
 		}
