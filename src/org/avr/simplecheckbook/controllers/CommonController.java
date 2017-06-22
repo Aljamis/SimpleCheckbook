@@ -169,16 +169,14 @@ abstract class CommonController {
 	
 	
 	/**
-	 * 
+	 * If a transaction has been entered in the past, need to update all the 
+	 * future balances
 	 * @param tx
 	 */
 	private void updateFutureBalances(Transaction tx) {
 		List<Balance> balances = checkBookDAO.getBalancesAfter( new Date(tx.getTxDate().getTime() ) );
 		for (Balance balance : balances) {
-			if (tx.getCredit() == null )
-				balance.subrtractPayment( tx.getDebit() );
-			else 
-				balance.addDeposit( tx.getCredit() );
+			calculateBalance(balance, tx);
 			checkBookDAO.saveBalance(balance);
 		}
 	}
@@ -272,4 +270,47 @@ abstract class CommonController {
 		else 
 			return false;
 	}
+	
+	
+	
+	
+	/**
+	 * Go through the entire checkbook recalculating daily balances
+	 */
+	protected void reCalculateBalances() {
+		Balance currentBalance = checkBookDAO.getBalance(180);
+		if (currentBalance == null) {
+			return;  // This must be the start of the check book
+		}
+		List<Transaction> trans = checkBookDAO.getTransactionsAfter( currentBalance );
+		LocalDate transDate = null;
+		
+		for (Transaction transaction : trans) {
+			transDate =  transaction.getTxDate().toLocalDateTime().toLocalDate();
+			
+			if ( transDate.isAfter( currentBalance.getDate() )) {
+				// Save the balance
+				checkBookDAO.saveBalance(currentBalance); 
+				BigDecimal prevBal = currentBalance.getBalance();
+				
+				// and create a new balance
+				currentBalance = new Balance();
+				currentBalance.setDate( transDate );
+				currentBalance.setBalance(prevBal);
+			}
+			
+			calculateBalance( currentBalance , transaction );
+		}
+		checkBookDAO.saveBalance(currentBalance); 
+	}
+	
+	
+	
+	private void calculateBalance(Balance bal , Transaction tx) {
+		if (tx.getCredit() == null )
+			bal.subrtractPayment( tx.getDebit() );
+		else 
+			bal.addDeposit( tx.getCredit() );
+	}
+	
 }

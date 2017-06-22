@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -556,8 +557,10 @@ public class SampleController extends CommonController {
 		/* DAO is null when user does not select a DB
 		 * and exits the application.
 		 */
-		if (checkBookDAO != null)
+		if (checkBookDAO != null) {
+			reCalculateBalances();
 			checkBookDAO.shutDown();
+		}
 	}
 	
 	
