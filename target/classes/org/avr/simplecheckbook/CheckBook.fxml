@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="600.0" minHeight="-Infinity" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.avr.simplecheckbook.controllers.SampleController">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="Checkbook">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#handleNewCheckBook" text="New" />
+              <MenuItem mnemonicParsing="false" onAction="#handleOpenExisting" text="Open Existing" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+              <MenuItem mnemonicParsing="false" onAction="#handleManageRecurring" text="Manage Recurring $$" />
+              <MenuItem mnemonicParsing="false" onAction="#handleManageFrequency" text="Manage Recurring Frequency" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+              <MenuItem mnemonicParsing="false" onAction="#handleClose" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Delete" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#handleAbout" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <center>
+      <TableView fx:id="transactionTable" onMouseClicked="#handleSelectedRow" prefHeight="200.0" prefWidth="200.0" stylesheets="@TableView.css" BorderPane.alignment="CENTER">
+        <columns>
+        
+          <TableColumn prefWidth="75.0" resizable="false" text="Date">
+          	<cellValueFactory>
+          		<PropertyValueFactory property="dateOnly" />
+          	</cellValueFactory>
+          </TableColumn>
+        
+          <TableColumn prefWidth="55.0" resizable="false" text="Num">
+          	<cellValueFactory>
+          		<PropertyValueFactory property="checkNumber" />
+          	</cellValueFactory>
+          </TableColumn>
+        
+          <TableColumn prefWidth="210" resizable="false" text="Pay to">
+          	<cellValueFactory>
+          		<PropertyValueFactory property="payee" />
+          	</cellValueFactory>
+          </TableColumn>
+          
+          <TableColumn maxWidth="15.0" minWidth="15.0" prefWidth="15.0" resizable="false" text="" visible="true">
+          	<cellValueFactory>
+              <PropertyValueFactory property="hasCleared" />
+            </cellValueFactory>
+          </TableColumn>
+          <TableColumn maxWidth="75.0" minWidth="75.0" prefWidth="75.0" resizable="false" sortable="false" styleClass="align-right" text="Debit">
+          	<cellValueFactory>
+              <PropertyValueFactory property="debit" />
+            </cellValueFactory>
+          </TableColumn>
+          
+          <TableColumn maxWidth="75.0" minWidth="75.0" prefWidth="75.0" resizable="false" sortable="false" styleClass="align-right" text="Credit">
+              <cellValueFactory>
+                <PropertyValueFactory property="credit" />
+              </cellValueFactory>
+          </TableColumn>
+          
+          <TableColumn editable="false" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" resizable="false" sortable="false" styleClass="align-right" text="Balance">
+              <cellValueFactory>
+                <PropertyValueFactory property="balance" />
+              </cellValueFactory>
+          </TableColumn>
+          
+        </columns>
+        
+         <contextMenu>
+            <ContextMenu>
+              <items>
+                  <MenuItem fx:id="toggleCleared" mnemonicParsing="false" onAction="#handleToggleClear" text="Toggle Cleared" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleRefresh" text="Refresh" />
+                <SeparatorMenuItem mnemonicParsing="false" />
+                   <MenuItem mnemonicParsing="false" onAction="#handleDeleteTransaction" text="Delete Transaction" />
+              </items>
+            </ContextMenu>
+         </contextMenu>
+         
+      </TableView>
+   </center>
+   <bottom>
+      <Pane maxHeight="120.0" maxWidth="600.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+		      <DatePicker fx:id="txDate" layoutX="300" layoutY="14.0" prefHeight="25.0" prefWidth="149.0" promptText="mm/dd/yyyy" />
+		      <TextField fx:id="txCheckNumber" layoutX="476.0" layoutY="14.0" prefHeight="25.0" prefWidth="100.0" promptText="Check Number" />
+		      <TextField fx:id="txPayee" layoutX="4.0" layoutY="48.0" prefHeight="25.0" prefWidth="382.0" promptText="Pay To" />
+		      <TextField fx:id="txAmount" layoutX="427.0" layoutY="48.0" promptText="Amount" />
+		      <TextField fx:id="txMemo" layoutX="4.0" layoutY="81.0" prefHeight="25.0" prefWidth="296.0" promptText="Memo" />
+
+		      <Button fx:id="btnPayment" layoutX="508.0" layoutY="81.0" mnemonicParsing="false" onAction="#handlePayment" text="Payment" />
+		      <Button fx:id="btnDeposit" layoutX="432.0" layoutY="81.0" mnemonicParsing="false" onAction="#handleDeposit" text="Deposit" />
+		
+		      <Button fx:id="btnUpdate" layoutX="508.0" layoutY="81.0" mnemonicParsing="false" onAction="#handleUpdate" text="Update" visible="false" />
+		      <Button fx:id="btnClear" layoutX="432.0" layoutY="81.0" mnemonicParsing="false" onAction="#handleClear" text="Clear" visible="false" />
+
+         </children>
+      </Pane>
+   </bottom>
+</BorderPane>
