@@ -65,10 +65,10 @@ public class SampleController extends CommonController {
 	private Stage primaryStage;
 	public void setStage(Stage stg) { 
 		this.primaryStage = stg;
-		stg.setTitle("ggg");
+		stg.setTitle( this.checkbookName );
 	}
 	
-	private String checkbookChosenTitle = "";
+	private String checkbookName = "";
 	
 	
 	/**
@@ -287,8 +287,7 @@ public class SampleController extends CommonController {
 	 * @param cb
 	 */
 	private void setupCheckBookDao(MasterCheckBook cb) {
-//		primaryStage.setTitle(cb.getDbName() +" - "+ cb.getDescription() );
-		
+		this.checkbookName  = cb.getDbName() +" - "+ cb.getDescription();
 		this.checkBookDAO = new CheckBookDAO( cb.getDbLocation() + File.separatorChar + cb.getDbName());
 		
 		/* TODO see if the versions are compatible */
