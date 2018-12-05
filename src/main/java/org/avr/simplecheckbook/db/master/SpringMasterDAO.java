@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javafx.application.Platform;
-import zorg.avr.derby.TempRow;
 
 
 
@@ -27,7 +26,7 @@ public class SpringMasterDAO {
 	private static Logger logger = LoggerFactory.getLogger( SpringMasterDAO.class );
 	
 	private JdbcTemplate jdbcTmplt;
-	static final String SCHEMA = CheckBookVersion.getVersion();
+//	static final String SCHEMA = CheckBookVersion.getVersion();
 	
 	
 	public SpringMasterDAO() {
