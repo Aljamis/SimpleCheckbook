@@ -31,7 +31,7 @@ public class CheckBookVersion {
 			Enumeration<URL> resources = CheckBookVersion.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
  			while ( resources.hasMoreElements() ) {
 				URL url = resources.nextElement();
-				if ( url.toString().contains("SimpleCheckbook.jar") ) {
+				if ( url.toString().contains("MavenCheckbook") ) {
 					VERSION = CheckBookVersion.class.getPackage().getImplementationVersion();
 					
 					Manifest mf = new Manifest( url.openStream());

@@ -26,7 +26,7 @@ import javafx.scene.control.Alert.AlertType;
  * @author Alfonso
  *
  */
-abstract class CommonController {
+public abstract class CommonController {
 
 	protected CheckBookDAO checkBookDAO;
 	

@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.avr.simplecheckbook.dataobjects.MasterCheckBook;
 import org.avr.simplecheckbook.utils.CheckBookVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,6 +24,7 @@ import zorg.avr.derby.TempRow;
  *
  */
 public class SpringMasterDAO {
+	private static Logger logger = LoggerFactory.getLogger( SpringMasterDAO.class );
 	
 	private JdbcTemplate jdbcTmplt;
 	static final String SCHEMA = CheckBookVersion.getVersion();
@@ -39,6 +42,7 @@ public class SpringMasterDAO {
 	 * @param suffix
 	 */
 	private void connect(String suffix) {
+		logger.debug("Opening a connection to ChkBookMaster");
 		DriverManagerDataSource dataSource = new DriverManagerDataSource("jdbc:derby:ChkBookMaster"+ suffix);
 		jdbcTmplt = new JdbcTemplate(dataSource);
 	}
@@ -50,8 +54,11 @@ public class SpringMasterDAO {
 	 */
 	private void doesDBexist() {
 		try {
+			logger.debug("Looking for existing checkbooks");
 			findAllCheckBooks();
+			logger.debug("Found some existing checkbooks");
 		} catch (CannotGetJdbcConnectionException sqlEx) {
+			logger.info("OH oH, ChkBookMaster does not exist.  Time to create it.");
 			connect(";create=true");
 			createTable();
 		}
@@ -91,6 +98,8 @@ public class SpringMasterDAO {
 		str.append(", ").append( MasterColumnNames.DBLOCATION ).append("  varChar(200) ");
 		str.append(", ").append( MasterColumnNames.DESCRIPTION ).append(" varChar(100) ");
 		str.append(" ) ");
+		
+		logger.debug("Creating a table : "+ str.toString() );
 		
 		try {
 			jdbcTmplt.execute( str.toString() );

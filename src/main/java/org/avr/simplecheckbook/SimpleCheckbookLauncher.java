@@ -1,6 +1,8 @@
 package org.avr.simplecheckbook;
 
 import org.avr.simplecheckbook.controllers.SampleController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -17,12 +19,13 @@ import javafx.stage.Stage;
  *
  */
 public class SimpleCheckbookLauncher extends Application {
+	private static Logger logger = LoggerFactory.getLogger(SimpleCheckbookLauncher.class);
 	
 	private SampleController myMainController = null;
 
 	@Override
 	public void start(Stage primaryStage) {
-		System.out.println("In the new launcher");
+		logger.debug("In the new launcher");
 		try {
 			FXMLLoader loader = new FXMLLoader( getClass().getResource("CheckBook.fxml"));
 			Parent root = (Parent)loader.load();
@@ -39,7 +42,7 @@ public class SimpleCheckbookLauncher extends Application {
 			ex.printStackTrace();
 		}
 		
-		System.out.println("Exitting the new launcher");
+		logger.debug("Exitting the new launcher");
 	}
 	
 	
@@ -51,7 +54,7 @@ public class SimpleCheckbookLauncher extends Application {
 	
 	@Override
 	public void stop() {
-		System.out.println("disconnecting from all DBs");
+		logger.info("disconnecting from all DBs");
 		this.myMainController.shutDown();
 	}
 

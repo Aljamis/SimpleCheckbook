@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -20,7 +19,8 @@ import org.avr.simplecheckbook.dataobjects.Transaction;
 import org.avr.simplecheckbook.db.master.CheckBookDAO;
 import org.avr.simplecheckbook.db.master.SpringMasterDAO;
 import org.avr.simplecheckbook.utils.CheckBookException;
-import org.avr.simplecheckbook.utils.CheckBookVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 
 import javafx.application.Platform;
@@ -43,6 +43,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class SampleController extends CommonController {
+	private static Logger logger = LoggerFactory.getLogger( SampleController.class );
+	
 	private SpringMasterDAO masterDAO;
 	
 	@FXML private TableView<Transaction> transactionTable;
@@ -71,37 +73,6 @@ public class SampleController extends CommonController {
 	private String checkbookName = "";
 	
 	
-	/**
-	 * Select all the Checkbooks from the MasterDB.  
-	 * 
-	 * If none are defined, prompt the user to create one.  
-	 * If 1 is defined, use that one.
-	 * If more than 1 is defined, prompt the user to select one.
-	 * 
-	 */
-	public void preLaunch() {
-		List<MasterCheckBook> books = masterDAO.findAllCheckBooks();
-		
-		switch ( books.size() ) {
-		case 0:
-			promptForNewCheckBook();
-			break;
-
-		case 1:
-			try{
-				setupCheckBookDao( books.get(0) );
-				findRecurringPayments();
-				refreshTableView();
-			} catch (CannotGetJdbcConnectionException noDBex) {
-				displayErrorDialog("Could not connect to "+ books.get(0).getDbLocation() );
-			}
-			break;
-
-		default:
-			selectFromList( books );
-			break;
-		}
-	}
 	
 	
 	
@@ -110,16 +81,18 @@ public class SampleController extends CommonController {
 	 */
 	@FXML
 	public void initialize() {
-		System.out.println("Running from initialize() ... ");
+		logger.debug("Running from initialize() ... ");
 
 		List<MasterCheckBook> books = masterDAO.findAllCheckBooks();
 		
 		switch ( books.size() ) {
 		case 0:
+			logger.debug("Did not find a single checkbook.  Prompting user to create one");
 			promptForNewCheckBook();
 			break;
 
 		case 1:
+			logger.debug("Found a single checkbook :  "+  books.get(0).getDescription() );
 			try{
 				setupCheckBookDao( books.get(0) );
 				findRecurringPayments();
@@ -130,6 +103,7 @@ public class SampleController extends CommonController {
 			break;
 
 		default:
+			logger.debug("WHOA!  Found "+ books.size() +" checkbooks.  Let the user decide");
 			selectFromList( books );
 			break;
 		}
@@ -227,31 +201,6 @@ public class SampleController extends CommonController {
 	
 	
 	
-	/**
-	 * Prompt user to update the database :
-	 * - export existing data
-	 * - create an entirely new checkbook in the same location
-	 * - load new checkbook
-	 * - tell user to delete old one using windows
-	 */
-	private void promptForDBupdate() {
-		System.out.println("Update the checkbook DB");
-		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle("Confirm");
-		alert.setHeaderText("Rebuild checkbook?");
-		alert.setContentText("The version of the application is inconsistent with the checkbook.");
-		
-		Optional<ButtonType> result = alert.showAndWait();
-		if ( result.get() == ButtonType.OK ) {
-			upgradeCheckBook();
-		} else {
-			System.out.println("Might have some inconsistent issues");
-		}
-	}
-	
-	
-	
-	
 	
 	/**
 	 * Present user with a list of possible checkbooks
@@ -287,6 +236,7 @@ public class SampleController extends CommonController {
 	 * @param cb
 	 */
 	private void setupCheckBookDao(MasterCheckBook cb) {
+		logger.debug("Opening connection to selected DB : "+ cb.getDescription() );
 		this.checkbookName  = cb.getDbName() +" - "+ cb.getDescription();
 		this.checkBookDAO = new CheckBookDAO( cb.getDbLocation() + File.separatorChar + cb.getDbName());
 		
@@ -299,7 +249,7 @@ public class SampleController extends CommonController {
 	
 	
 	/**
-	 * Display transactions older than 180 days :
+	 * Display transactions within the last 180 days :
 	 *   get balance from 180 days ago
 	 *   get all transactions after that balance.
 	 *   Calculate balance after each transaction
@@ -307,14 +257,18 @@ public class SampleController extends CommonController {
 	private void refreshTableView() {
 		Balance bal = checkBookDAO.getBalance(180);
 		if (bal == null) {
-			this.transactionTable.setItems(null);
-			return;  // This must be the start of the check book
+			bal = checkBookDAO.getNextMostRecentBalance();
+			if (bal == null) {
+				// This is a new Checkbook b/c there are no balances.
+				this.transactionTable.setItems(null);
+				return;
+			}
 		}
 		List<Transaction> trans = checkBookDAO.getTransactionsAfter(bal);
+		
 		calculateTxBalance(bal , trans );
 		this.transactionTable.setItems( FXCollections.observableArrayList( trans ));
 		setRowHover();
-		
 		clearInputFields();
 	}
 	

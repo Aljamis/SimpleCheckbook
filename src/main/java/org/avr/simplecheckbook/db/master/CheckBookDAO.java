@@ -312,6 +312,7 @@ public class CheckBookDAO {
 	
 	
 	/**
+	 * Return Balance from numOfDays ago.  If no Balance is found the most recent Balance is returned.
 	 * 
 	 * @param numOfDays
 	 * @return
@@ -325,12 +326,12 @@ public class CheckBookDAO {
 		List<Balance> balances = getBalance( qry.toString() );
 		
 		if (balances.isEmpty()) {
-			/* There isn't a balance in the past numOfDays ... so
-			 * I'll look for the latest one */
-			qry.setLength(0);
-			qry.append("select * from daily_balance order by date  ");
-			balances = getBalance( qry.toString() );
-			if ( balances.isEmpty() )
+//			/* There isn't a balance in the past numOfDays ... so
+//			 * I'll look for the latest one */
+//			qry.setLength(0);
+//			qry.append("select * from daily_balance order by date desc ");
+//			balances = getBalance( qry.toString() );
+//			if ( balances.isEmpty() )
 				return null;
 		}
 		
@@ -370,6 +371,30 @@ public class CheckBookDAO {
 	}
 	public Balance getBalanceOn(Date txDate) {
 		return getBalance(txDate , CheckBookDAO.ON );
+	}
+	
+	
+	
+	/**
+	 * Return the next most recent balance.  This will allow transactions to be collected
+	 * that occurred on the LAST daily_balance
+	 * @return
+	 */
+	public Balance getNextMostRecentBalance() {
+		StringBuffer qry = new StringBuffer();
+		qry.append("select * from daily_balance order by date desc ");
+		List<Balance> balances = getBalance( qry.toString() );
+		
+		switch ( balances.size()) {
+		case 0:
+			return null;
+			
+		case 1:
+			return balances.get(0);
+
+		default:
+			return balances.get(1);
+		}
 	}
 	
 	

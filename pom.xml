@@ -12,13 +12,52 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
+  
+  
+  <build>
+  	<plugins>
+  		<plugin>
+  			<groupId>org.apache.maven.plugins</groupId>
+  			<artifactId>maven-dependency-plugin</artifactId>
+  			<executions>
+  				<execution>
+  					<id>copy-dependencies</id>
+  					<phase>prepare-package</phase>
+  					<goals>
+  						<goal>copy-dependencies</goal>
+  					</goals>
+  					<configuration>
+  						<outputDirectory>${project.build.directory}/libs</outputDirectory>
+  					</configuration>
+  				</execution>
+  			</executions>
+  		</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-jar-plugin</artifactId>
+		    <configuration>
+		        <archive>
+		            <manifest>
+		                <addClasspath>true</addClasspath>
+		                <classpathPrefix>libs/</classpathPrefix>
+		                <mainClass>
+		                    org.avr.simplecheckbook.SimpleCheckbookLauncher
+		                </mainClass>
+		            </manifest>
+		        </archive>
+		    </configuration>
+		</plugin>  		
+  	</plugins>
+  </build>
 
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
     
@@ -58,6 +97,20 @@
     <artifactId>commons-pool</artifactId>
     <version>1.6</version>
 </dependency>
+
+<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>1.7.25</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-simple</artifactId>
+    <version>1.7.25</version>
+</dependency>
+
 
     
   </dependencies>
