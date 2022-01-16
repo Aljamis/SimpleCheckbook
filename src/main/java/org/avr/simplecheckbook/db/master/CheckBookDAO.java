@@ -1,9 +1,11 @@
 package org.avr.simplecheckbook.db.master;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -236,9 +238,23 @@ public class CheckBookDAO {
 		qry.append(" and ").append( CheckBookColumnNames.LGCL_DLT_DT ).append(" is null ");
 		qry.append(" order by ").append( CheckBookColumnNames.TX_DATE ).append(" asc ");
 		qry.append(", ").append( CheckBookColumnNames.CHECKNUM ).append(" asc ");
-
 		
-		return getTransactions(qry.toString());
+//		return getTransactions(qry.toString());
+		/*
+		 * This happens if the checkbook has not been touched in > 180 days.  An
+		 * empty transaction set results in index(0) being empty.
+		 */
+		List<Transaction> trans = getTransactions(qry.toString());
+		if (trans.isEmpty()) {
+			Transaction t = new Transaction();
+			t.setBalance( bal.getBalance() );
+			t.setPayee("Opening Balance");
+			t.setTxDate( Timestamp.valueOf(bal.getDate().atStartOfDay() ) );
+			t.setCredit(new BigDecimal(0));
+			trans.add(t);
+		}
+		
+		return trans;
 	}
 	
 	
