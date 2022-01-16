@@ -4,10 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.avr.simplecheckbook.dataobjects.MasterCheckBook;
 import org.avr.simplecheckbook.utils.CheckBookVersion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -23,7 +23,7 @@ import javafx.application.Platform;
  *
  */
 public class SpringMasterDAO {
-	private static Logger logger = LoggerFactory.getLogger( SpringMasterDAO.class );
+	private static Logger logger = LogManager.getLogger( SpringMasterDAO.class );
 	
 	private JdbcTemplate jdbcTmplt;
 //	static final String SCHEMA = CheckBookVersion.getVersion();

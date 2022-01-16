@@ -10,6 +10,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.avr.simplecheckbook.ExistingCheckBookDialog;
 import org.avr.simplecheckbook.NewCheckBookDialog;
 import org.avr.simplecheckbook.SelectCheckBookDialog;
@@ -19,8 +21,6 @@ import org.avr.simplecheckbook.dataobjects.Transaction;
 import org.avr.simplecheckbook.db.master.CheckBookDAO;
 import org.avr.simplecheckbook.db.master.SpringMasterDAO;
 import org.avr.simplecheckbook.utils.CheckBookException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 
 import javafx.application.Platform;
@@ -43,7 +43,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class SampleController extends CommonController {
-	private static Logger logger = LoggerFactory.getLogger( SampleController.class );
+	private static Logger logger = LogManager.getLogger( SampleController.class );
 	
 	private SpringMasterDAO masterDAO;
 	

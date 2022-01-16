@@ -1,8 +1,9 @@
 package org.avr.simplecheckbook;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.avr.simplecheckbook.controllers.SampleController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -19,7 +20,7 @@ import javafx.stage.Stage;
  *
  */
 public class SimpleCheckbookLauncher extends Application {
-	private static Logger logger = LoggerFactory.getLogger(SimpleCheckbookLauncher.class);
+	private static Logger logger = LogManager.getLogger();
 	
 	private SampleController myMainController = null;
 
