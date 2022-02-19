@@ -172,7 +172,6 @@ public class SampleController extends CommonController {
 	
 	
 	@FXML protected void handleClose() {
-		shutDown();
 		Platform.exit();
 	}
 	
@@ -551,6 +550,7 @@ public class SampleController extends CommonController {
 		if (checkBookDAO != null) {
 			reCalculateBalances();
 			checkBookDAO.shutDown();
+			logger.debug("Checkbook has been SHUTDOWN");
 		}
 	}
 	
